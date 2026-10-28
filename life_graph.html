@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 인생 그래프 그리기 - 진로·생애 설계</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- html2canvas for PNG Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+        }
+        .canvas-container {
+            position: relative;
+            touch-action: none;
+        }
+        /* Custom scrollbar for events table */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen pb-12">
+
+    <!-- Header & Navigation -->
+    <header class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-500 rounded-lg text-2xl">
+                    <i class="fa-solid fa-chart-line text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">🌱 나의 인생 그래프 (Life Graph)</h1>
+                    <p class="text-xs sm:text-sm text-indigo-200">중학교 3학년 진로 & 생애 설계 프로젝트</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="btn-sample" class="bg-indigo-500 hover:bg-indigo-400 text-white text-xs sm:text-sm px-3 py-2 rounded-lg transition flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 예시 불러오기
+                </button>
+                <button id="btn-reset" class="bg-rose-500 hover:bg-rose-400 text-white text-xs sm:text-sm px-3 py-2 rounded-lg transition flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-rotate-left"></i> 초기화
+                </button>
+                <button id="btn-download" class="bg-emerald-500 hover:bg-emerald-400 text-white text-xs sm:text-sm px-4 py-2 rounded-lg font-bold transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-download"></i> 제출 / PNG 저장
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+        <!-- 캡처 대상 영역 (Capture Area for PNG) -->
+        <div id="capture-area" class="bg-white rounded-2xl shadow-xl border border-slate-200 p-4 sm:p-6 lg:p-8 space-y-6">
+
+            <!-- Title & Student Info Header inside export document -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">나의 생애 설계 & 인생 곡선</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">과거를 돌아보고 현재를 지나 미래의 나의 꿈과 삶을 설계합니다.</p>
+                </div>
+
+                <!-- 학생 정보 입력 폼 -->
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 w-full md:w-auto">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <label for="student-id" class="text-xs sm:text-sm font-semibold text-slate-600 whitespace-nowrap">학번:</label>
+                        <input type="text" id="student-id" placeholder="예: 30101" 
+                               class="w-full sm:w-28 px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <label for="student-name" class="text-xs sm:text-sm font-semibold text-slate-600 whitespace-nowrap">이름:</label>
+                        <input type="text" id="student-name" placeholder="예: 홍길동" 
+                               class="w-full sm:w-28 px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Container Section -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs sm:text-sm text-slate-600 font-medium">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info text-indigo-500"></i>
+                        그래프의 원하는 위치를 <strong class="text-indigo-600">클릭/터치</strong>하거나 하단의 <strong class="text-indigo-600">[사건 추가]</strong>를 누르세요.
+                    </span>
+                    <span class="hidden sm:inline-block bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                        Y축: 행복/만족도 (+100 ~ -100) | X축: 나이 (0 ~ 80세)
+                    </span>
+                </div>
+
+                <!-- Interactive Canvas Canvas Wrapper -->
+                <div class="canvas-container bg-slate-900 rounded-xl overflow-hidden shadow-inner border border-slate-800">
+                    <canvas id="life-canvas" class="w-full h-[400px] sm:h-[480px] lg:h-[520px] cursor-crosshair block"></canvas>
+                </div>
+            </div>
+
+            <!-- Event List & Detail Data Table -->
+            <div class="pt-2">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-indigo-500"></i> 인생 주요 사건 및 미래 계획 리스트
+                    </h3>
+                    <button id="btn-add-manual" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm px-3.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> 사건 직접 추가
+                    </button>
+                </div>
+
+                <!-- Table Container -->
+                <div class="overflow-x-auto border border-slate-200 rounded-xl bg-white">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                                <th class="p-3 text-center w-16">나이</th>
+                                <th class="p-3 text-center w-24">만족도 점수</th>
+                                <th class="p-3 w-48 sm:w-64">사건 / 계획 제목</th>
+                                <th class="p-3">상세 내용 및 다짐</th>
+                                <th class="p-3 text-center w-24 border-l border-slate-200">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="events-table-body" class="divide-y divide-slate-100">
+                            <!-- JS dynamic insertion -->
+                        </tbody>
+                    </table>
+                    <div id="empty-notice" class="py-8 text-center text-slate-400 hidden">
+                        <i class="fa-regular fa-folder-open text-3xl mb-2"></i>
+                        <p class="text-sm">등록된 인생 사건이 없습니다. 그래프를 클릭하여 점을 추가해보세요!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Quote / Class Note -->
+            <div class="bg-indigo-50/70 rounded-xl p-4 border border-indigo-100 text-xs sm:text-sm text-indigo-900 flex items-start gap-3">
+                <i class="fa-solid fa-quote-left text-indigo-400 text-xl mt-0.5"></i>
+                <div>
+                    <strong class="font-bold">진로 수업 안내:</strong> 그래프의 굴곡은 실패가 아닌 내 삶의 중요한 성장 포인트입니다. 
+                    미래의 내 모습을 자유롭게 상상하고 도전하고 싶은 꿈과 목표를 80세까지 멋지게 그려보세요!
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal for Adding/Editing Points -->
+    <div id="event-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all border border-slate-100">
+            <!-- Modal Header -->
+            <div class="bg-indigo-600 px-6 py-4 text-white flex justify-between items-center">
+                <h3 id="modal-title" class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> 인생 사건 추가/수정
+                </h3>
+                <button type="button" id="modal-close-btn" class="text-indigo-200 hover:text-white text-xl font-bold transition">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="event-form" class="p-6 space-y-4">
+                <input type="hidden" id="event-id">
+
+                <!-- Age & Score grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="event-age" class="block text-xs font-semibold text-slate-700 mb-1">나이 (0~80세) <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <input type="number" id="event-age" min="0" max="80" required
+                                   class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-bold">세</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="event-score" class="block text-xs font-semibold text-slate-700 mb-1">행복/만족도 (-100~100) <span class="text-rose-500">*</span></label>
+                        <input type="number" id="event-score" min="-100" max="100" required
+                               class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <!-- Quick Score Slider -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-slate-500 font-medium">만족도 빠른 조절</span>
+                        <span id="slider-val-display" class="text-xs font-bold text-indigo-600">0점</span>
+                    </div>
+                    <input type="range" id="event-score-slider" min="-100" max="100" value="0" step="5"
+                           class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                    <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                        <span>-100 (최악)</span>
+                        <span>0 (보통)</span>
+                        <span>+100 (최고)</span>
+                    </div>
+                </div>
+
+                <!-- Event Title -->
+                <div>
+                    <label for="event-title-input" class="block text-xs font-semibold text-slate-700 mb-1">사건/계획 한 줄 요약 <span class="text-rose-500">*</span></label>
+                    <input type="text" id="event-title-input" placeholder="예: 중학교 졸업 및 고등학교 진학" required
+                           class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <!-- Event Description -->
+                <div>
+                    <label for="event-desc-input" class="block text-xs font-semibold text-slate-700 mb-1">상세 내용 및 생각 (선택)</label>
+                    <textarea id="event-desc-input" rows="3" placeholder="당시 상황, 느낀 점, 또는 미래를 위한 나의 다짐을 기록하세요."
+                              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex justify-between items-center pt-2">
+                    <button type="button" id="modal-delete-btn" class="text-rose-600 hover:text-rose-700 text-xs font-semibold flex items-center gap-1 hidden">
+                        <i class="fa-solid fa-trash-can"></i> 이 점 삭제
+                    </button>
+                    <div class="flex gap-2 ml-auto">
+                        <button type="button" id="modal-cancel-btn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+                            취소
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-md">
+                            저장하기
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Custom Toast -->
+    <div id="toast-message" class="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2 text-sm font-medium">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-text">알림 메시지</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- State Management ---
+        let lifeEvents = [];
+        let hoveredEventId = null;
+        let selectedEventId = null;
+
+        // --- Canvas Config ---
+        const canvas = document.getElementById('life-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Dynamic Padding based on screen size
+        let padding = { top: 40, right: 30, bottom: 50, left: 50 };
+
+        // --- Init Function ---
+        window.onload = function () {
+            initSampleData();
+            resizeCanvas();
+            render();
+        };
+
+        // --- Default Sample Data for Grade 3 Middle Schoolers ---
+        function initSampleData() {
+            lifeEvents = [
+                { id: '1', age: 0, score: 50, title: '태어남', desc: '세상에 첫발을 내딛다' },
+                { id: '2', age: 7, score: 70, title: '초등학교 입학', desc: '새로운 친구들과 가방 메고 학교로' },
+                { id: '3', age: 14, score: 40, title: '중학교 진학 & 방황', desc: '공부 부담감과 첫 진로 고민' },
+                { id: '4', age: 15, score: 85, title: '현재: 중3 꿈 발견', desc: '생애 설계 수업을 들으며 내 꿈을 구체화함' },
+                { id: '5', age: 25, score: 90, title: '원하는 대학 졸업 및 취업', desc: '스스로의 힘으로 꿈꿔온 전문 분야 도전 성공' },
+                { id: '6', age: 40, score: 60, title: '일과 삶의 슬럼프', desc: '지친 일상이 찾아왔지만 가족과 함께 극복' },
+                { id: '7', age: 60, score: 95, title: '세계 여행 및 제2의 인생', desc: '버킷리스트 실현 및 은퇴 후 봉사 활동' },
+                { id: '8', age: 80, score: 100, title: '행복한 삶 회고', desc: '후회 없이 사랑하고 도전했던 내 멋진 인생!' }
+            ];
+            sortEvents();
+        }
+
+        // --- Responsive Canvas Resizing ---
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            ctx.scale(dpr, dpr);
+
+            // Responsive Paddings
+            if (rect.width < 500) {
+                padding = { top: 35, right: 20, bottom: 45, left: 40 };
+            } else {
+                padding = { top: 45, right: 35, bottom: 55, left: 55 };
+            }
+
+            render();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Coordinate Transforms ---
+        function getCanvasDimensions() {
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            const graphWidth = width - padding.left - padding.right;
+            const graphHeight = height - padding.top - padding.bottom;
+            const centerY = padding.top + graphHeight / 2;
+            return { width, height, graphWidth, graphHeight, centerY };
+        }
+
+        function ageToX(age) {
+            const { graphWidth } = getCanvasDimensions();
+            return padding.left + (age / 80) * graphWidth;
+        }
+
+        function scoreToY(score) {
+            const { graphHeight, centerY } = getCanvasDimensions();
+            // score ranges from -100 (bottom) to +100 (top)
+            return centerY - (score / 100) * (graphHeight / 2);
+        }
+
+        function xToAge(x) {
+            const { graphWidth } = getCanvasDimensions();
+            const age = Math.round(((x - padding.left) / graphWidth) * 80);
+            return Math.max(0, Math.min(80, age));
+        }
+
+        function yToScore(y) {
+            const { graphHeight, centerY } = getCanvasDimensions();
+            const score = Math.round(((centerY - y) / (graphHeight / 2)) * 100);
+            return Math.max(-100, Math.min(100, score));
+        }
+
+        // --- Render Main Canvas ---
+        function render() {
+            const rect = canvas.getBoundingClientRect();
+            drawGraphToCanvas(canvas, rect.width, rect.height, false);
+            // Update HTML Table
+            renderTable();
+        }
+
+        // --- Core Drawing Routine for Screen and Export Canvas ---
+        function drawGraphToCanvas(targetCanvas, width, height, isExport = false) {
+            const ctx = targetCanvas.getContext('2d');
+            let p = { top: 40, right: 35, bottom: 50, left: 55 };
+            if (!isExport && width < 500) {
+                p = { top: 35, right: 20, bottom: 45, left: 40 };
+            }
+            
+            const graphWidth = width - p.left - p.right;
+            const graphHeight = height - p.top - p.bottom;
+            const centerY = p.top + graphHeight / 2;
+
+            const ageToX = (age) => p.left + (age / 80) * graphWidth;
+            const scoreToY = (score) => centerY - (score / 100) * (graphHeight / 2);
+
+            // 1. Clear Screen & Background
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, width, height);
+
+            // 2. Y-Axis Positive / Negative Area Hints
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.04)';
+            ctx.fillRect(p.left, p.top, graphWidth, graphHeight / 2);
+
+            ctx.fillStyle = 'rgba(244, 63, 94, 0.04)';
+            ctx.fillRect(p.left, centerY, graphWidth, graphHeight / 2);
+
+            // 3. Grid Lines (5-year intervals)
+            for (let age = 0; age <= 80; age += 5) {
+                const x = ageToX(age);
+                const isMajor = age % 10 === 0;
+
+                ctx.strokeStyle = isMajor ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, p.top);
+                ctx.lineTo(x, height - p.bottom);
+                ctx.stroke();
+
+                // X-Axis Age Labels
+                if (isExport || width > 500 || isMajor) {
+                    ctx.fillStyle = isMajor ? '#cbd5e1' : '#94a3b8';
+                    ctx.font = isMajor ? 'bold 11px Noto Sans KR, sans-serif' : '10px Noto Sans KR, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${age}세`, x, height - p.bottom + 18);
+                }
+            }
+
+            // Horizontal Grid (Score -100 to +100)
+            for (let score = -100; score <= 100; score += 25) {
+                const y = scoreToY(score);
+                const isZero = score === 0;
+
+                if (isZero) {
+                    ctx.strokeStyle = '#818cf8';
+                    ctx.lineWidth = 2;
+                } else {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                    ctx.lineWidth = 1;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(p.left, y);
+                ctx.lineTo(width - p.right, y);
+                ctx.stroke();
+
+                // Y-Axis Labels
+                ctx.fillStyle = isZero ? '#a5b4fc' : '#64748b';
+                ctx.font = isZero ? 'bold 11px Noto Sans KR, sans-serif' : '10px Noto Sans KR, sans-serif';
+                ctx.textAlign = 'right';
+                const labelText = score > 0 ? `+${score}` : `${score}`;
+                ctx.fillText(labelText, p.left - 8, y + 4);
+            }
+
+            // Outer Frame
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(p.left, p.top, graphWidth, graphHeight);
+
+            // 4. Line Graph Drawing
+            if (lifeEvents.length > 0) {
+                const lineGradient = ctx.createLinearGradient(p.left, 0, width - p.right, 0);
+                lineGradient.addColorStop(0, '#38bdf8');
+                lineGradient.addColorStop(0.5, '#818cf8');
+                lineGradient.addColorStop(1, '#c084fc');
+
+                ctx.beginPath();
+                lifeEvents.forEach((ev, idx) => {
+                    const x = ageToX(ev.age);
+                    const y = scoreToY(ev.score);
+                    if (idx === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.strokeStyle = lineGradient;
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+
+                // Area Fill under curve
+                ctx.beginPath();
+                lifeEvents.forEach((ev, idx) => {
+                    const x = ageToX(ev.age);
+                    const y = scoreToY(ev.score);
+                    if (idx === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.lineTo(ageToX(lifeEvents[lifeEvents.length - 1].age), centerY);
+                ctx.lineTo(ageToX(lifeEvents[0].age), centerY);
+                ctx.closePath();
+                
+                const fillGradient = ctx.createLinearGradient(0, p.top, 0, height - p.bottom);
+                fillGradient.addColorStop(0, 'rgba(56, 189, 248, 0.15)');
+                fillGradient.addColorStop(0.5, 'rgba(129, 140, 248, 0.05)');
+                fillGradient.addColorStop(1, 'rgba(244, 63, 94, 0.15)');
+                ctx.fillStyle = fillGradient;
+                ctx.fill();
+
+                // 5. Draw Dots & Event Title Labels
+                lifeEvents.forEach((ev) => {
+                    const x = ageToX(ev.age);
+                    const y = scoreToY(ev.score);
+                    const isHovered = !isExport && (ev.id === hoveredEventId);
+
+                    if (isHovered) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 14, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(129, 140, 248, 0.4)';
+                        ctx.fill();
+                    }
+
+                    // Outer Circle
+                    ctx.beginPath();
+                    ctx.arc(x, y, isHovered ? 8 : 6, 0, Math.PI * 2);
+                    ctx.fillStyle = ev.score >= 0 ? '#10b981' : '#f43f5e';
+                    ctx.fill();
+
+                    // Inner White Core
+                    ctx.beginPath();
+                    ctx.arc(x, y, isHovered ? 4 : 3, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+
+                    // Text Tag
+                    ctx.font = isHovered ? 'bold 12px Noto Sans KR, sans-serif' : '11px Noto Sans KR, sans-serif';
+                    ctx.textAlign = 'center';
+
+                    const isTop = y > p.top + 40;
+                    const textY = isTop ? y - 12 : y + 20;
+
+                    let displayTitle = ev.title;
+                    if (displayTitle.length > 9) {
+                        displayTitle = displayTitle.substring(0, 9) + '..';
+                    }
+
+                    const textWidth = ctx.measureText(displayTitle).width;
+                    ctx.fillStyle = isHovered ? 'rgba(79, 70, 229, 0.95)' : 'rgba(30, 41, 59, 0.9)';
+                    ctx.beginPath();
+                    ctx.roundRect(x - textWidth / 2 - 6, textY - 11, textWidth + 12, 16, 4);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText(displayTitle, x, textY + 1);
+                });
+            }
+        }
+
+        // --- Sort Events by Age ---
+        function sortEvents() {
+            lifeEvents.sort((a, b) => a.age - b.age);
+        }
+
+        // --- Render Events Table in HTML ---
+        function renderTable() {
+            const tbody = document.getElementById('events-table-body');
+            const emptyNotice = document.getElementById('empty-notice');
+            tbody.innerHTML = '';
+
+            if (lifeEvents.length === 0) {
+                emptyNotice.classList.remove('hidden');
+                return;
+            } else {
+                emptyNotice.classList.add('hidden');
+            }
+
+            lifeEvents.forEach((ev) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-indigo-50/50 transition duration-150';
+                
+                const scoreBadgeClass = ev.score > 0 
+                    ? 'bg-emerald-100 text-emerald-800' 
+                    : ev.score < 0 ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700';
+
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold text-slate-700">${ev.age}세</td>
+                    <td class="p-3 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${scoreBadgeClass}">
+                            ${ev.score > 0 ? '+' : ''}${ev.score}점
+                        </span>
+                    </td>
+                    <td class="p-3 font-semibold text-slate-900">${escapeHtml(ev.title)}</td>
+                    <td class="p-3 text-slate-600">${escapeHtml(ev.desc || '-')}</td>
+                    <td class="p-3 text-center border-l border-slate-200">
+                        <div class="flex justify-center gap-2">
+                            <button onclick="editEvent('${ev.id}')" class="text-indigo-600 hover:text-indigo-800 p-1 font-semibold text-xs transition" title="수정">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteEvent('${ev.id}')" class="text-rose-500 hover:text-rose-700 p-1 font-semibold text-xs transition" title="삭제">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Interactive Mouse & Touch Handling on Canvas ---
+        function getCanvasPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function findEventNear(x, y, radius = 15) {
+            return lifeEvents.find((ev) => {
+                const px = ageToX(ev.age);
+                const py = scoreToY(ev.score);
+                const dist = Math.hypot(px - x, py - y);
+                return dist <= radius;
+            });
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getCanvasPos(e);
+            const nearEvent = findEventNear(pos.x, pos.y);
+            
+            if (nearEvent) {
+                if (hoveredEventId !== nearEvent.id) {
+                    hoveredEventId = nearEvent.id;
+                    canvas.style.cursor = 'pointer';
+                    render();
+                }
+            } else {
+                if (hoveredEventId !== null) {
+                    hoveredEventId = null;
+                    canvas.style.cursor = 'crosshair';
+                    render();
+                }
+            }
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const pos = getCanvasPos(e);
+            const nearEvent = findEventNear(pos.x, pos.y);
+
+            if (nearEvent) {
+                // Edit existing point
+                openModal(nearEvent);
+            } else {
+                // Clicked blank space: create new point at calculated age and score
+                const clickedAge = xToAge(pos.x);
+                const clickedScore = yToScore(pos.y);
+
+                openModal({
+                    id: '',
+                    age: clickedAge,
+                    score: clickedScore,
+                    title: '',
+                    desc: ''
+                });
+            }
+        });
+
+        // Touch event handling for mobile and tablet devices
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const pos = getCanvasPos(e);
+            const nearEvent = findEventNear(pos.x, pos.y);
+
+            if (nearEvent) {
+                openModal(nearEvent);
+            } else {
+                const clickedAge = xToAge(pos.x);
+                const clickedScore = yToScore(pos.y);
+
+                openModal({
+                    id: '',
+                    age: clickedAge,
+                    score: clickedScore,
+                    title: '',
+                    desc: ''
+                });
+            }
+        }, { passive: false });
+
+        // --- Modal & Form Logic ---
+        const modal = document.getElementById('event-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const eventIdInput = document.getElementById('event-id');
+        const eventAgeInput = document.getElementById('event-age');
+        const eventScoreInput = document.getElementById('event-score');
+        const eventScoreSlider = document.getElementById('event-score-slider');
+        const sliderValDisplay = document.getElementById('slider-val-display');
+        const eventTitleInput = document.getElementById('event-title-input');
+        const eventDescInput = document.getElementById('event-desc-input');
+        const deleteBtn = document.getElementById('modal-delete-btn');
+
+        function openModal(data) {
+            if (data.id) {
+                modalTitle.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> 인생 사건 수정 (${data.age}세)`;
+                eventIdInput.value = data.id;
+                deleteBtn.classList.remove('hidden');
+            } else {
+                modalTitle.innerHTML = `<i class="fa-solid fa-plus-circle"></i> 새로운 인생 사건 추가 (${data.age}세)`;
+                eventIdInput.value = '';
+                deleteBtn.classList.add('hidden');
+            }
+
+            eventAgeInput.value = data.age;
+            eventScoreInput.value = data.score;
+            eventScoreSlider.value = data.score;
+            sliderValDisplay.textContent = `${data.score > 0 ? '+' : ''}${data.score}점`;
+            eventTitleInput.value = data.title || '';
+            eventDescInput.value = data.desc || '';
+
+            modal.classList.remove('hidden');
+            eventTitleInput.focus();
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        // Sync Score Input & Slider
+        eventScoreInput.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value) || 0;
+            val = Math.max(-100, Math.min(100, val));
+            eventScoreSlider.value = val;
+            sliderValDisplay.textContent = `${val > 0 ? '+' : ''}${val}점`;
+        });
+
+        eventScoreSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            eventScoreInput.value = val;
+            sliderValDisplay.textContent = `${val > 0 ? '+' : ''}${val}점`;
+        });
+
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+
+        document.getElementById('event-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const id = eventIdInput.value;
+            const age = parseInt(eventAgeInput.value);
+            const score = parseInt(eventScoreInput.value);
+            const title = eventTitleInput.value.trim();
+            const desc = eventDescInput.value.trim();
+
+            if (isNaN(age) || age < 0 || age > 80) {
+                showToast('나이는 0세에서 80세 사이로 입력해주세요.', 'warning');
+                return;
+            }
+
+            if (id) {
+                // Update
+                const ev = lifeEvents.find(item => item.id === id);
+                if (ev) {
+                    ev.age = age;
+                    ev.score = score;
+                    ev.title = title;
+                    ev.desc = desc;
+                }
+                showToast('인생 사건이 수정되었습니다.');
+            } else {
+                // Add New
+                const newEvent = {
+                    id: String(Date.now()),
+                    age: age,
+                    score: score,
+                    title: title,
+                    desc: desc
+                };
+                lifeEvents.push(newEvent);
+                showToast('새로운 인생 사건이 추가되었습니다.');
+            }
+
+            sortEvents();
+            render();
+            closeModal();
+        });
+
+        // Global function for Table Edit/Delete
+        window.editEvent = function (id) {
+            const ev = lifeEvents.find(item => item.id === id);
+            if (ev) openModal(ev);
+        };
+
+        window.deleteEvent = function (id) {
+            lifeEvents = lifeEvents.filter(item => item.id !== id);
+            sortEvents();
+            render();
+            showToast('해당 사건이 삭제되었습니다.');
+        };
+
+        deleteBtn.addEventListener('click', () => {
+            const id = eventIdInput.value;
+            if (id) {
+                deleteEvent(id);
+                closeModal();
+            }
+        });
+
+        // Manual Add Button
+        document.getElementById('btn-add-manual').addEventListener('click', () => {
+            openModal({
+                id: '',
+                age: 20,
+                score: 50,
+                title: '',
+                desc: ''
+            });
+        });
+
+        // Reset Button
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            if (confirm('모든 입력 내용이 삭제되고 초기화됩니다. 계속 진행하시겠습니까?')) {
+                lifeEvents = [];
+                render();
+                showToast('초기화되었습니다. 새로운 인생을 설계해보세요!');
+            }
+        });
+
+        // Load Sample Button
+        document.getElementById('btn-sample').addEventListener('click', () => {
+            initSampleData();
+            render();
+            showToast('샘플 예시 데이터가 생성되었습니다.');
+        });
+
+        // --- HTML & Data Escaper ---
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // --- Notification Toast Utility ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-message');
+            const toastText = document.getElementById('toast-text');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastText.textContent = message;
+            if (type === 'warning') {
+                toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400 text-lg';
+            } else {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // --- HTML2Canvas PNG Export (A4 Landscape Layout) ---
+        document.getElementById('btn-download').addEventListener('click', () => {
+            const studentId = document.getElementById('student-id').value.trim() || '학번미입력';
+            const studentName = document.getElementById('student-name').value.trim() || '무명';
+
+            if (lifeEvents.length === 0) {
+                showToast('그래프에 점을 최소 1개 이상 작성한 후 저장해주세요.', 'warning');
+                return;
+            }
+
+            showToast('A4 가로 양식 이미지 생성 중입니다...', 'success');
+
+            // 1. Create temporary off-screen container with fixed A4 Landscape aspect ratio (1200px x 848px)
+            const exportContainer = document.createElement('div');
+            exportContainer.style.position = 'fixed';
+            exportContainer.style.left = '-9999px';
+            exportContainer.style.top = '-9999px';
+            exportContainer.style.width = '1200px';
+            exportContainer.style.height = '848px';
+            exportContainer.style.backgroundColor = '#ffffff';
+            exportContainer.style.padding = '36px 40px';
+            exportContainer.style.boxSizing = 'border-box';
+            exportContainer.style.fontFamily = "'Noto Sans KR', sans-serif";
+            exportContainer.style.display = 'flex';
+            exportContainer.style.flexDirection = 'column';
+            exportContainer.style.justifyContent = 'space-between';
+
+            exportContainer.innerHTML = `
+                <!-- Header Title & Student Info -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 26px;">🌱</span>
+                            <h1 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 0; tracking-tight;">나의 인생 그래프 (Life Graph)</h1>
+                        </div>
+                        <p style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">중학교 3학년 진로 & 생애 설계 프로젝트 | 과거를 돌아보고 미래의 꿈과 삶을 설계합니다.</p>
+                    </div>
+                    <div style="display: flex; gap: 16px; background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 12px; align-items: center;">
+                        <div style="font-size: 15px; font-weight: 700; color: #334155;">
+                            <span style="color: #64748b; font-weight: 500;">학번:</span> ${escapeHtml(studentId)}
+                        </div>
+                        <div style="width: 1px; height: 16px; background-color: #cbd5e1;"></div>
+                        <div style="font-size: 15px; font-weight: 700; color: #334155;">
+                            <span style="color: #64748b; font-weight: 500;">이름:</span> ${escapeHtml(studentName)}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Graph Section Only -->
+                <div style="background-color: #0f172a; border-radius: 16px; overflow: hidden; height: 630px; position: relative; margin: 16px 0;">
+                    <canvas id="export-canvas" width="1120" height="630" style="display: block; width: 1120px; height: 630px;"></canvas>
+                </div>
+
+                <!-- Subtitle / Legend Footer -->
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #64748b; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                    <span>Y축: 행복/만족도 (+100 ~ -100) | X축: 나이 (0 ~ 80세, 5세 단위)</span>
+                    <span>작성일: ${new Date().toLocaleDateString('ko-KR')}</span>
+                </div>
+            `;
+
+            document.body.appendChild(exportContainer);
+
+            // 2. Render Graph to Export Canvas
+            const expCanvas = exportContainer.querySelector('#export-canvas');
+            drawGraphToCanvas(expCanvas, 1120, 630, true);
+
+            // 3. Capture with html2canvas and trigger download
+            setTimeout(() => {
+                html2canvas(exportContainer, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false,
+                    width: 1200,
+                    height: 848
+                }).then((canvasResult) => {
+                    const link = document.createElement('a');
+                    const filename = `인생그래프_${studentId}_${studentName}.png`;
+                    link.download = filename;
+                    link.href = canvasResult.toDataURL('image/png');
+                    link.click();
+
+                    document.body.removeChild(exportContainer);
+                    showToast(`'${filename}' A4 가로 이미지 저장 완료!`);
+                }).catch((err) => {
+                    console.error(err);
+                    if (document.body.contains(exportContainer)) {
+                        document.body.removeChild(exportContainer);
+                    }
+                    showToast('이미지 저장 중 오류가 발생했습니다.', 'warning');
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>
