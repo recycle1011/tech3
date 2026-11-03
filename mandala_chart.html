@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중3 나만의 만다라트 목표 달성 계획표</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas for Exporting PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts: Gowun Dodum & Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'mandalart-bg': '#F4F7FE',
+                        'sub-1': '#FFECEC', // Soft Coral/Pink
+                        'sub-2': '#FFF4E5', // Peach/Orange
+                        'sub-3': '#FFFDE7', // Soft Yellow
+                        'sub-4': '#E8F5E9', // Mint/Green
+                        'sub-5': '#E0F7FA', // Soft Cyan
+                        'sub-6': '#E8EAF6', // Lavender/Blue
+                        'sub-7': '#F3E5F5', // Soft Purple
+                        'sub-8': '#FCE4EC', // Soft Rose
+
+                        'sub-1-border': '#FFB2B2',
+                        'sub-2-border': '#FFCC80',
+                        'sub-3-border': '#FFF59D',
+                        'sub-4-border': '#A5D6A7',
+                        'sub-5-border': '#80DEEA',
+                        'sub-6-border': '#9FA8DA',
+                        'sub-7-border': '#CE93D8',
+                        'sub-8-border': '#F48FB1',
+                    },
+                    fontFamily: {
+                        gowun: ['Gowun Dodum', 'sans-serif'],
+                        noto: ['Noto Sans KR', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #edf2f7;
+            user-select: none;
+        }
+
+        /* Mandalart Grid Layout Styling */
+        .mandalart-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 12px;
+            background-color: #ffffff;
+            padding: 16px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 1100px;
+            aspect-ratio: 1 / 1;
+        }
+
+        .block-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 4px;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 6px;
+            border: 2px solid #cbd5e1;
+            transition: all 0.2s ease;
+        }
+
+        /* Special thick border for central 3x3 block */
+        .block-center-main {
+            border: 4px solid #475569 !important;
+            box-shadow: 0 0 15px rgba(71, 85, 105, 0.15);
+            background-color: #f1f5f9;
+        }
+
+        .cell-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 2px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .cell-item:focus-within {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            resize: none;
+            border: none;
+            outline: none;
+            background: transparent;
+            text-align: center;
+            font-size: 0.82rem;
+            font-weight: 500;
+            line-height: 1.25;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        textarea::placeholder {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 400;
+        }
+
+        /* Color theme mappings for sub-goals */
+        .theme-sub-1 { background-color: #FFECEC !important; border-color: #FFB2B2 !important; }
+        .theme-sub-2 { background-color: #FFF4E5 !important; border-color: #FFCC80 !important; }
+        .theme-sub-3 { background-color: #FFFDE7 !important; border-color: #FFF59D !important; }
+        .theme-sub-4 { background-color: #E8F5E9 !important; border-color: #A5D6A7 !important; }
+        .theme-sub-5 { background-color: #E0F7FA !important; border-color: #80DEEA !important; }
+        .theme-sub-6 { background-color: #E8EAF6 !important; border-color: #9FA8DA !important; }
+        .theme-sub-7 { background-color: #F3E5F5 !important; border-color: #CE93D8 !important; }
+        .theme-sub-8 { background-color: #FCE4EC !important; border-color: #F48FB1 !important; }
+
+        /* Main core goal style */
+        .theme-core-main {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+            border-color: #4338ca !important;
+        }
+        .theme-core-main textarea {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+        }
+        .theme-core-main textarea::placeholder {
+            color: #c7d2fe !important;
+        }
+
+        /* Center sub-goal mirrors */
+        .sub-goal-mirror {
+            font-weight: 700 !important;
+        }
+        .sub-goal-mirror textarea {
+            font-weight: 700 !important;
+            color: #1e293b;
+        }
+
+        /* Custom Scrollbar for textareas if needed */
+        textarea::-webkit-scrollbar {
+            width: 3px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.15);
+            border-radius: 3px;
+        }
+
+        /* Toast notification */
+        #toast {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Print Canvas Formatting helper */
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+            .mandalart-container { shadow: none; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 flex flex-col items-center p-3 md:p-6 text-slate-800">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="w-full max-w-[1100px] mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 md:px-6 md:py-4 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-2xl font-black shadow-md shadow-indigo-200">
+                <i class="fa-solid fa-bullseye"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full">중3 미래설계 프로젝트</span>
+                    <span id="save-status" class="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> 자동 저장됨
+                    </span>
+                </div>
+                <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight mt-0.5">나만의 만다라트 목표 달성 계획표</h1>
+            </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-wrap items-center gap-2">
+            <button onclick="fillSampleData()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs md:text-sm transition flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> 예시 채우기
+            </button>
+            <button onclick="confirmReset()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-semibold text-xs md:text-sm transition flex items-center gap-1.5">
+                <i class="fa-solid fa-rotate-right"></i> 초기화
+            </button>
+            <button onclick="exportToPNG()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs md:text-sm transition shadow-md shadow-indigo-200 flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> A4 가로 PNG 저장
+            </button>
+        </div>
+    </header>
+
+    <!-- GUIDANCE BANNER -->
+    <div class="w-full max-w-[1100px] mb-4 bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 text-xs md:text-sm text-indigo-900 flex items-start gap-2.5">
+        <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5 text-base"></i>
+        <div>
+            <strong>작성 방법:</strong> 
+            ① 가장 중앙의 <span class="text-indigo-700 font-bold">최상위 목표(파란색)</span>를 입력하세요. 
+            ② 중앙 8칸에 <span class="font-bold text-slate-700">하위 목표</span>를 채우면 각 영역 중앙으로 자동 복사됩니다. 
+            ③ 영역별 테두리 둘레 8칸에 <span class="font-bold text-slate-700">구체적인 실천 계획</span>을 완성하세요!
+        </div>
+    </div>
+
+    <!-- MAIN MANDALART GRID PRINTABLE AREA -->
+    <main id="export-area" class="w-full flex flex-col items-center bg-transparent">
+        
+        <!-- HEADER PRINT VISIBLE TITLE (ONLY FOR EXPORT) -->
+        <div class="hidden print-header w-full max-w-[1100px] text-center mb-3">
+            <h2 class="text-2xl font-black text-slate-800">꿈을 향한 나의 만다라트 계획표</h2>
+            <p class="text-sm text-slate-500">중학교 3학년 | 작성일: <span id="current-date"></span></p>
+        </div>
+
+        <div class="mandalart-container" id="mandalart-grid">
+            <!-- Grid will be generated via JavaScript -->
+        </div>
+
+        <!-- FOOTER BRANDING FOR EXPORT -->
+        <div class="w-full max-w-[1100px] mt-3 flex justify-between items-center text-xs text-slate-400 px-2">
+            <span>✨ 중3 나만의 목표 달성 계획표</span>
+            <span>꿈을 향한 도전, 하나씩 실천해봐요! 💪</span>
+        </div>
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl opacity-0 pointer-events-none transform translate-y-3 flex items-center gap-2 text-sm z-50">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-msg">메시지 내용</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Sub-goal color mapping table (8 sub goals layout index mapping)
+        // Order in 3x3 outer blocks:
+        // Top-Left (0,0)->Sub1, Top-Mid (0,1)->Sub2, Top-Right (0,2)->Sub3
+        // Mid-Left (1,0)->Sub4,                 Mid-Right (1,2)->Sub5
+        // Bot-Left (2,0)->Sub6, Bot-Mid (2,1)->Sub7, Bot-Right (2,2)->Sub8
+        const BLOCK_THEMES = {
+            '0-0': { id: 1, name: 'sub-1', label: '하위목표 1' },
+            '0-1': { id: 2, name: 'sub-2', label: '하위목표 2' },
+            '0-2': { id: 3, name: 'sub-3', label: '하위목표 3' },
+            '1-0': { id: 4, name: 'sub-4', label: '하위목표 4' },
+            '1-2': { id: 5, name: 'sub-5', label: '하위목표 5' },
+            '2-0': { id: 6, name: 'sub-6', label: '하위목표 6' },
+            '2-1': { id: 7, name: 'sub-7', label: '하위목표 7' },
+            '2-2': { id: 8, name: 'sub-8', label: '하위목표 8' }
+        };
+
+        // Inner cells position to sub-goal id mapping inside Central Block (1,1)
+        const CENTRAL_SUB_MAP = {
+            '0-0': 1, '0-1': 2, '0-2': 3,
+            '1-0': 4,          '1-2': 5,
+            '2-0': 6, '2-1': 7, '2-2': 8
+        };
+
+        const STORAGE_KEY = 'mandalart_data_grade3_v1';
+
+        // Initialize grid on DOM Ready
+        window.addEventListener('DOMContentLoaded', () => {
+            setCurrentDate();
+            buildMandalartGrid();
+            loadSavedData();
+        });
+
+        function setCurrentDate() {
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+            const dateEl = document.getElementById('current-date');
+            if (dateEl) dateEl.innerText = dateStr;
+        }
+
+        // Build the 9x9 Mandalart Grid (3x3 outer grid, each containing 3x3 cells)
+        function buildMandalartGrid() {
+            const gridContainer = document.getElementById('mandalart-grid');
+            gridContainer.innerHTML = '';
+
+            for (let bRow = 0; bRow < 3; bRow++) {
+                for (let bCol = 0; bCol < 3; bCol++) {
+                    const blockKey = `${bRow}-${bCol}`;
+                    const isCenterBlock = (bRow === 1 && bCol === 1);
+                    
+                    const blockDiv = document.createElement('div');
+                    blockDiv.className = `block-3x3 ${isCenterBlock ? 'block-center-main' : ''}`;
+                    blockDiv.dataset.blockKey = blockKey;
+
+                    let blockThemeId = null;
+                    if (!isCenterBlock) {
+                        blockThemeId = BLOCK_THEMES[blockKey].id;
+                        blockDiv.classList.add(`theme-sub-${blockThemeId}`);
+                    }
+
+                    // Build 3x3 inner cells for this block
+                    for (let cRow = 0; cRow < 3; cRow++) {
+                        for (let cCol = 0; cCol < 3; cCol++) {
+                            const innerKey = `${cRow}-${cCol}`;
+                            const cellDiv = document.createElement('div');
+                            cellDiv.className = 'cell-item';
+
+                            const textarea = document.createElement('textarea');
+                            textarea.id = `cell_${bRow}_${bCol}_${cRow}_${cCol}`;
+                            textarea.setAttribute('spellcheck', 'false');
+
+                            if (isCenterBlock) {
+                                // Central 3x3 Block Logic
+                                if (cRow === 1 && cCol === 1) {
+                                    // TOP MAIN CORE GOAL
+                                    cellDiv.classList.add('theme-core-main');
+                                    textarea.placeholder = "🎯 최상위 목표\n(예: 멋진 고교 진학 & 균형잡힌 성장)";
+                                    textarea.addEventListener('input', autoSave);
+                                } else {
+                                    // Sub Goal Input (1 ~ 8)
+                                    const subId = CENTRAL_SUB_MAP[innerKey];
+                                    cellDiv.classList.add(`theme-sub-${subId}`);
+                                    textarea.placeholder = `하위목표 ${subId}`;
+                                    textarea.dataset.subId = subId;
+                                    textarea.addEventListener('input', (e) => {
+                                        syncSubGoalToOuter(subId, e.target.value);
+                                        autoSave();
+                                    });
+                                }
+                            } else {
+                                // Outer 8 Blocks Logic
+                                const isOuterCenter = (cRow === 1 && cCol === 1);
+                                if (isOuterCenter) {
+                                    // Center cell of outer block: Mirror of Sub-goal
+                                    cellDiv.classList.add(`theme-sub-${blockThemeId}`, 'sub-goal-mirror');
+                                    textarea.id = `sub_mirror_${blockThemeId}`;
+                                    textarea.placeholder = `하위목표 ${blockThemeId}`;
+                                    textarea.readOnly = true; // Synced automatically
+                                    textarea.tabIndex = -1;
+                                } else {
+                                    // Action plan input cell
+                                    textarea.placeholder = "실천 계획";
+                                    textarea.addEventListener('input', autoSave);
+                                }
+                            }
+
+                            cellDiv.appendChild(textarea);
+                            blockDiv.appendChild(cellDiv);
+                        }
+                    }
+
+                    gridContainer.appendChild(blockDiv);
+                }
+            }
+        }
+
+        // Sync Central Sub-goal text to Outer Block Central Cell
+        function syncSubGoalToOuter(subId, text) {
+            const mirrorTextarea = document.getElementById(`sub_mirror_${subId}`);
+            if (mirrorTextarea) {
+                mirrorTextarea.value = text;
+            }
+        }
+
+        // Auto Save to LocalStorage
+        function autoSave() {
+            const data = {};
+            const textareas = document.querySelectorAll('.mandalart-container textarea');
+            textareas.forEach(ta => {
+                if (ta.id) {
+                    data[ta.id] = ta.value;
+                }
+            });
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            
+            const statusEl = document.getElementById('save-status');
+            statusEl.style.opacity = '1';
+        }
+
+        // Load Saved Data from LocalStorage
+        function loadSavedData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+
+            try {
+                const data = JSON.parse(raw);
+                Object.keys(data).forEach(id => {
+                    const ta = document.getElementById(id);
+                    if (ta) {
+                        ta.value = data[id];
+                    }
+                });
+
+                // Trigger sync for sub goals
+                for (let subId = 1; subId <= 8; subId++) {
+                    const centralTa = document.querySelector(`textarea[data-sub-id="${subId}"]`);
+                    if (centralTa) {
+                        syncSubGoalToOuter(subId, centralTa.value);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load saved mandalart data", e);
+            }
+        }
+
+        // Reset All Inputs with Confirmation
+        function confirmReset() {
+            if (confirm("작성하신 모든 목표와 실천 계획이 초기화됩니다. 정말로 다시 작성하시겠습니까?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                const textareas = document.querySelectorAll('.mandalart-container textarea');
+                textareas.forEach(ta => ta.value = '');
+                showToast("계획표가 깔끔하게 초기화되었습니다.", "fa-rotate-right", "text-amber-400");
+            }
+        }
+
+        // Fill Sample Data for Middle School Student Demo
+        function fillSampleData() {
+            const sampleData = {
+                // Main Core Goal
+                'cell_1_1_1_1': "🔥 보람찬 중3 마무리 & 알찬 고교 준비",
+
+                // 8 Sub-goals in Center Block
+                'cell_1_1_0_0': "📚 학업 성적 향상",
+                'cell_1_1_0_1': "💪 기초 체력 증진",
+                'cell_1_1_0_2': "🎨 취미 & 스트레스 해소",
+                'cell_1_1_1_0': "🤝 진정한 친구 관계",
+                'cell_1_1_1_2': "⏰ 독서 & 인문 교양",
+                'cell_1_1_2_0': "💰 바른 경제 습관",
+                'cell_1_1_2_1': "🧩 진로 & 진학 탐색",
+                'cell_1_1_2_2': "🌱 좋은 생활 습관"
+            };
+
+            // Sample Action Plans for Sub-Goal 1 (Academic)
+            const sampleActionsSub1 = {
+                'cell_0_0_0_0': "수학 매일 5문제 풀기",
+                'cell_0_0_0_1': "영어 단어 하루 20개",
+                'cell_0_0_0_2': "시험 3주 전 계획표 작성",
+                'cell_0_0_1_0': "수업시간 맨 앞자리 앉기",
+                'cell_0_0_1_2': "오답노트 작성 습관화",
+                'cell_0_0_2_0': "질문 매일 1개 이상 하기",
+                'cell_0_0_2_1': "타이머 공부법(25분/5분)",
+                'cell_0_0_2_2': "스마트폰 공부 중 끄기"
+            };
+
+            // Sample Action Plans for Sub-Goal 2 (Physical Health)
+            const sampleActionsSub2 = {
+                'cell_0_1_0_0': "주 3회 30분 러닝",
+                'cell_0_1_0_1': "자세 바르게 유지하기",
+                'cell_0_1_0_2': "매일 아침 스트레칭",
+                'cell_0_1_1_0': "물 하루 1.5L 마시기",
+                'cell_0_1_1_2': "패스트푸드 주 1회 이하",
+                'cell_0_1_2_0': "수면 시간 7시간 확보",
+                'cell_0_1_2_1': "자전거 등교 시도",
+                'cell_0_1_2_2': "비타민 잘 챙겨먹기"
+            };
+
+            // Apply all sample data
+            const finalSample = { ...sampleData, ...sampleActionsSub1, ...sampleActionsSub2 };
+
+            Object.keys(finalSample).forEach(id => {
+                const ta = document.getElementById(id);
+                if (ta) ta.value = finalSample[id];
+            });
+
+            // Trigger sync for central sub goals
+            for (let subId = 1; subId <= 8; subId++) {
+                const centralTa = document.querySelector(`textarea[data-sub-id="${subId}"]`);
+                if (centralTa) {
+                    syncSubGoalToOuter(subId, centralTa.value);
+                }
+            }
+
+            autoSave();
+            showToast("샘플 목표가 채워졌습니다! 자유롭게 수정해보세요.", "fa-wand-magic-sparkles", "text-amber-400");
+        }
+
+        // Export Grid to A4 Landscape PNG
+        function exportToPNG() {
+            showToast("A4 가로 PNG 이미지를 생성 중입니다...", "fa-spinner fa-spin", "text-indigo-400");
+
+            const exportArea = document.getElementById('export-area');
+            const printHeader = exportArea.querySelector('.print-header');
+
+            // Temporarily show printable header for export canvas
+            if (printHeader) printHeader.classList.remove('hidden');
+
+            // Use html2canvas options for optimal high-res landscape capture
+            html2canvas(exportArea, {
+                scale: 2.5, // High resolution
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                logging: false,
+                onclone: (clonedDoc) => {
+                    const clonedTarget = clonedDoc.getElementById('export-area');
+                    clonedTarget.style.padding = "30px";
+                    clonedTarget.style.width = "1200px"; // Standard landscape proportion
+                }
+            }).then(canvas => {
+                // Re-hide print header
+                if (printHeader) printHeader.classList.add('hidden');
+
+                // Create download link
+                const link = document.createElement('a');
+                const today = new Date().toISOString().slice(0, 10);
+                link.download = `중3_만다라트_계획표_${today}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                showToast("A4 가로 PNG 이미지가 성공적으로 저장되었습니다! 💾", "fa-circle-check", "text-emerald-400");
+            }).catch(err => {
+                console.error(err);
+                if (printHeader) printHeader.classList.add('hidden');
+                showToast("이미지 저장 중 오류가 발생했습니다.", "fa-triangle-exclamation", "text-rose-400");
+            });
+        }
+
+        // Toast Notification Helper
+        function showToast(message, iconClass = "fa-circle-check", iconColor = "text-emerald-400") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            toastIcon.className = `fa-solid ${iconClass} ${iconColor}`;
+
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
