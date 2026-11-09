@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>초등 고학년 추천도서 50권 도장깨기 📚✨</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Gothic A1 / Nanum Gothic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;800;900&family=Jua&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lit: '#3b82f6',     // 문학 (Blue)
+                        sci: '#10b981',     // 과학 (Green)
+                        his: '#f97316',     // 역사 (Orange)
+                        soc: '#8b5cf6',     // 사회 (Purple)
+                        art: '#ec4899',     // 예술 (Pink)
+                    },
+                    fontFamily: {
+                        jua: ['Jua', 'sans-serif'],
+                        main: ['Gothic A1', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Gothic A1', sans-serif;
+            background-color: #f0fdf4;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .font-jua {
+            font-family: 'Jua', sans-serif;
+        }
+
+        /* Puzzle Tile Flip / Peel Effect */
+        .puzzle-tile {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center center;
+        }
+        .puzzle-tile.cleared {
+            opacity: 0;
+            transform: scale(0.3) rotate(15deg);
+            pointer-events: none;
+        }
+
+        /* Custom Stamp Effect */
+        .stamp-animation {
+            animation: stampPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes stampPop {
+            0% { transform: scale(3) rotate(-20deg); opacity: 0; }
+            50% { transform: scale(0.9) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-amber-50 via-teal-50 to-indigo-50 min-h-screen text-slate-800 pb-16">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-amber-200 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-3xl">🏆</span>
+                <div>
+                    <h1 class="font-jua text-xl md:text-2xl text-amber-900 leading-tight">초등 고학년 독서 도장깨기</h1>
+                    <p class="text-xs text-slate-500 font-semibold">50권의 지식 탐험 퍼즐 레이스!</p>
+                </div>
+            </div>
+            <button onclick="confirmReset()" class="text-xs font-semibold px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-full hover:bg-red-100 transition flex items-center gap-1 active:scale-95">
+                <i class="fa-solid font-bold fa-rotate-right"></i> 리셋
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 pt-4 space-y-6">
+
+        <!-- Progress Overview & Puzzle Container -->
+        <section class="glass-card rounded-3xl p-4 md:p-6 shadow-xl border-2 border-white relative overflow-hidden">
+            <!-- Progress Bar Info -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                <div>
+                    <span class="inline-block px-3 py-1 bg-amber-100 text-amber-800 text-xs font-extrabold rounded-full mb-1">독서 완성도</span>
+                    <h2 class="font-jua text-2xl md:text-3xl text-slate-800 flex items-center gap-2">
+                        숨겨진 비밀 그림 찾기 
+                        <span id="progress-percent" class="text-amber-600 font-black">0%</span>
+                    </h2>
+                </div>
+                <!-- Status Badge -->
+                <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-2xl self-start md:self-auto">
+                    <i class="fa-solid fa-book-bookmark text-amber-500 text-xl"></i>
+                    <div>
+                        <div class="text-xs text-slate-500 font-bold">읽은 책 수</div>
+                        <div class="font-jua text-lg text-slate-800"><span id="read-count" class="text-2xl text-emerald-600 font-bold">0</span> / 50 권</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden mb-6 p-0.5 border border-slate-300">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-indigo-500 rounded-full transition-all duration-500 w-0"></div>
+            </div>
+
+            <!-- Hidden Puzzle Canvas/Container -->
+            <div class="relative w-full aspect-[16/10] max-h-[420px] rounded-2xl overflow-hidden shadow-inner border-4 border-amber-300/80 bg-slate-900 group">
+                
+                <!-- Underneath Hidden Art (Cute Fantasy Library SVG) -->
+                <div class="absolute inset-0 w-full h-full bg-slate-800 flex items-center justify-center">
+                    <svg class="w-full h-full object-cover" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#2e1065" />
+                                <stop offset="50%" stop-color="#581c87" />
+                                <stop offset="100%" stop-color="#0f172a" />
+                            </linearGradient>
+                            <linearGradient id="tree-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#fbbf24" />
+                                <stop offset="100%" stop-color="#d97706" />
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- Background Magic Library Room -->
+                        <rect width="800" height="500" fill="url(#bg-grad)"/>
+                        
+                        <!-- Stars / Magic Sparkles -->
+                        <circle cx="100" cy="80" r="3" fill="#fef08a" opacity="0.8"/>
+                        <circle cx="250" cy="50" r="2" fill="#fff" opacity="0.9"/>
+                        <circle cx="650" cy="70" r="4" fill="#fef08a" opacity="0.8"/>
+                        <circle cx="720" cy="120" r="3" fill="#fff" opacity="0.7"/>
+                        <path d="M 400 40 Q 405 50 415 50 Q 405 50 400 60 Q 395 50 385 50 Q 395 50 400 40 Z" fill="#fde047"/>
+
+                        <!-- Bookcase Left -->
+                        <rect x="20" y="80" width="140" height="380" rx="8" fill="#451a03" stroke="#78350f" stroke-width="4"/>
+                        <rect x="30" y="140" width="120" height="12" fill="#78350f"/>
+                        <rect x="30" y="240" width="120" height="12" fill="#78350f"/>
+                        <rect x="30" y="340" width="120" height="12" fill="#78350f"/>
+                        <!-- Books Left Shelf -->
+                        <rect x="35" y="90" width="18" height="50" fill="#ef4444" rx="2"/>
+                        <rect x="55" y="95" width="22" height="45" fill="#3b82f6" rx="2"/>
+                        <rect x="79" y="85" width="15" height="55" fill="#10b981" rx="2"/>
+                        <rect x="96" y="100" width="25" height="40" fill="#f59e0b" rx="2"/>
+                        <rect x="35" y="180" width="20" height="60" fill="#a855f7" rx="2"/>
+                        <rect x="57" y="190" width="18" height="50" fill="#ec4899" rx="2"/>
+                        <rect x="77" y="175" width="28" height="65" fill="#06b6d4" rx="2"/>
+
+                        <!-- Bookcase Right -->
+                        <rect x="640" y="80" width="140" height="380" rx="8" fill="#451a03" stroke="#78350f" stroke-width="4"/>
+                        <rect x="650" y="140" width="120" height="12" fill="#78350f"/>
+                        <rect x="650" y="240" width="120" height="12" fill="#78350f"/>
+                        <rect x="650" y="340" width="120" height="12" fill="#78350f"/>
+                        <!-- Books Right Shelf -->
+                        <rect x="655" y="85" width="24" height="55" fill="#f43f5e" rx="2"/>
+                        <rect x="681" y="92" width="18" height="48" fill="#8b5cf6" rx="2"/>
+                        <rect x="701" y="88" width="22" height="52" fill="#10b981" rx="2"/>
+                        <rect x="725" y="95" width="20" height="45" fill="#eab308" rx="2"/>
+
+                        <!-- Cozy Rug Center -->
+                        <ellipse cx="400" cy="430" rx="240" ry="50" fill="#7c2d12" stroke="#b45309" stroke-width="4"/>
+                        <ellipse cx="400" cy="430" rx="210" ry="40" fill="#9a3412"/>
+
+                        <!-- Giant Magic Tree Window Center -->
+                        <path d="M 280 320 C 280 180 330 100 400 100 C 470 100 520 180 520 320 Z" fill="#1e1b4b" stroke="#fbbf24" stroke-width="6"/>
+                        <!-- Window Moon & Tree -->
+                        <circle cx="450" cy="160" r="35" fill="#fef08a"/>
+                        <path d="M 330 320 Q 380 220 400 200 Q 420 220 470 320 Z" fill="#064e3b"/>
+
+                        <!-- Character 1: Cute Bear with Glasses Reading (Center Left) -->
+                        <g transform="translate(230, 270)">
+                            <!-- Body -->
+                            <ellipse cx="60" cy="110" rx="45" ry="50" fill="#b45309"/>
+                            <ellipse cx="60" cy="110" rx="30" ry="35" fill="#fde68a"/>
+                            <!-- Head -->
+                            <circle cx="60" cy="55" r="40" fill="#b45309"/>
+                            <!-- Ears -->
+                            <circle cx="30" cy="25" r="14" fill="#b45309"/>
+                            <circle cx="30" cy="25" r="8" fill="#fde68a"/>
+                            <circle cx="90" cy="25" r="14" fill="#b45309"/>
+                            <circle cx="90" cy="25" r="8" fill="#fde68a"/>
+                            <!-- Snout -->
+                            <ellipse cx="60" cy="65" rx="16" ry="12" fill="#fde68a"/>
+                            <ellipse cx="60" cy="60" rx="6" ry="4" fill="#451a03"/>
+                            <!-- Eyes with Glasses -->
+                            <circle cx="48" cy="50" r="4" fill="#1e293b"/>
+                            <circle cx="72" cy="50" r="4" fill="#1e293b"/>
+                            <circle cx="48" cy="50" r="12" fill="none" stroke="#eab308" stroke-width="3"/>
+                            <circle cx="72" cy="50" r="12" fill="none" stroke="#eab308" stroke-width="3"/>
+                            <line x1="60" y1="50" x2="60" y2="50" stroke="#eab308" stroke-width="3"/>
+                            <!-- Wizard Hat -->
+                            <path d="M 25 35 Q 60 -20 95 35 Z" fill="#6366f1"/>
+                            <polygon points="60,0 65,12 78,12 67,20 71,32 60,24 49,32 53,20 42,12 55,12" fill="#fde047"/>
+                            <!-- Book in Hands -->
+                            <path d="M 25 90 Q 60 100 60 120 Q 60 100 95 90 L 95 125 Q 60 135 60 120 Q 60 135 25 125 Z" fill="#ef4444"/>
+                        </g>
+
+                        <!-- Character 2: Cute Rabbit Wizard Flying on Magic Book (Center Right) -->
+                        <g transform="translate(450, 210)">
+                            <!-- Floating Book -->
+                            <path d="M 10 100 Q 70 80 130 100 Q 70 120 10 100 Z" fill="#3b82f6" stroke="#60a5fa" stroke-width="3"/>
+                            <path d="M 15 105 Q 70 88 125 105" fill="none" stroke="#fff" stroke-width="2"/>
+                            <!-- Bunny Body -->
+                            <ellipse cx="70" cy="65" rx="25" ry="30" fill="#f8fafc"/>
+                            <!-- Bunny Head -->
+                            <circle cx="70" cy="30" r="24" fill="#f8fafc"/>
+                            <!-- Long Ears -->
+                            <ellipse cx="58" cy="-10" rx="7" ry="25" fill="#f8fafc" transform="rotate(-10 58 -10)"/>
+                            <ellipse cx="58" cy="-10" rx="4" ry="18" fill="#f472b6" transform="rotate(-10 58 -10)"/>
+                            <ellipse cx="82" cy="-10" rx="7" ry="25" fill="#f8fafc" transform="rotate(10 82 -10)"/>
+                            <ellipse cx="82" cy="-10" rx="4" ry="18" fill="#f472b6" transform="rotate(10 82 -10)"/>
+                            <!-- Face -->
+                            <circle cx="62" cy="28" r="3" fill="#0f172a"/>
+                            <circle cx="78" cy="28" r="3" fill="#0f172a"/>
+                            <polygon points="70,33 67,36 73,36" fill="#f472b6"/>
+                            <path d="M 62 38 Q 70 43 78 38" fill="none" stroke="#475569" stroke-width="2"/>
+                            <!-- Cheek Blush -->
+                            <circle cx="58" cy="34" r="4" fill="#fbcfe8" opacity="0.8"/>
+                            <circle cx="82" cy="34" r="4" fill="#fbcfe8" opacity="0.8"/>
+                            <!-- Wand -->
+                            <line x1="85" y1="45" x2="115" y2="20" stroke="#eab308" stroke-width="4" stroke-linecap="round"/>
+                            <polygon points="115,15 118,22 125,22 119,27 122,34 115,29 108,34 111,27 105,22 112,22" fill="#fde047"/>
+                        </g>
+
+                        <!-- Character 3: Cute Cat Reading on Stack of Books (Right) -->
+                        <g transform="translate(600, 290)">
+                            <!-- Book Stack -->
+                            <rect x="0" y="110" width="90" height="22" fill="#10b981" rx="4"/>
+                            <rect x="5" y="88" width="80" height="22" fill="#f59e0b" rx="4"/>
+                            <rect x="10" y="66" width="70" height="22" fill="#ec4899" rx="4"/>
+                            <!-- Cat Body -->
+                            <ellipse cx="45" cy="40" rx="20" ry="22" fill="#fb923c"/>
+                            <!-- Cat Head -->
+                            <circle cx="45" cy="18" r="18" fill="#fb923c"/>
+                            <!-- Cat Ears -->
+                            <polygon points="30,8 35,-6 43,5" fill="#fb923c"/>
+                            <polygon points="32,6 35,-2 40,5" fill="#fbcfe8"/>
+                            <polygon points="60,8 55,-6 47,5" fill="#fb923c"/>
+                            <polygon points="58,6 55,-2 50,5" fill="#fbcfe8"/>
+                            <!-- Face -->
+                            <circle cx="38" cy="16" r="2.5" fill="#1e293b"/>
+                            <circle cx="52" cy="16" r="2.5" fill="#1e293b"/>
+                            <ellipse cx="45" cy="20" rx="2" ry="1.5" fill="#ef4444"/>
+                            <!-- Tail -->
+                            <path d="M 65 45 Q 85 40 80 20" fill="none" stroke="#fb923c" stroke-width="6" stroke-linecap="round"/>
+                        </g>
+
+                        <!-- Character 4: Cute Owl perched on Sign (Top Center) -->
+                        <g transform="translate(370, 60)">
+                            <ellipse cx="30" cy="30" rx="22" ry="25" fill="#8b5cf6"/>
+                            <ellipse cx="30" cy="33" rx="14" ry="17" fill="#ede9fe"/>
+                            <!-- Eyes -->
+                            <circle cx="20" cy="22" r="9" fill="#fff"/>
+                            <circle cx="40" cy="22" r="9" fill="#fff"/>
+                            <circle cx="20" cy="22" r="4" fill="#0f172a"/>
+                            <circle cx="40" cy="22" r="4" fill="#0f172a"/>
+                            <!-- Beak -->
+                            <polygon points="30,25 26,30 34,30" fill="#f59e0b"/>
+                            <!-- Graduation Cap -->
+                            <rect x="15" y="4" width="30" height="6" fill="#1e293b"/>
+                            <polygon points="30,-4 5,5 30,14 55,5" fill="#0f172a"/>
+                            <circle cx="30" cy="5" r="2" fill="#fde047"/>
+                        </g>
+
+                        <!-- Sparkles and Banner -->
+                        <g font-family="'Jua', sans-serif" font-weight="bold" text-anchor="middle">
+                            <rect x="250" y="440" width="300" height="42" rx="21" fill="#fde047" stroke="#b45309" stroke-width="3"/>
+                            <text x="400" y="468" fill="#78350f" font-size="20">🎉 축하합니다! 50권 완독 달성! 🎉</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- 5x10 Overlay Grid (50 Puzzle Tiles) -->
+                <div id="puzzle-grid" class="absolute inset-0 grid grid-cols-10 grid-rows-5 w-full h-full z-10 gap-[1px] bg-amber-900/40 p-[1px]">
+                    <!-- Dynamically generated 50 tiles -->
+                </div>
+            </div>
+
+            <!-- Hint Text -->
+            <p class="text-center text-xs text-amber-800 font-semibold mt-3 flex items-center justify-center gap-1">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i> 아래 도서 목록에서 책을 읽고 도장을 찍으면 퍼즐 조각이 벗겨져요!
+            </p>
+        </section>
+
+        <!-- Filter & Search Controls -->
+        <section class="space-y-3">
+            <!-- Category Tabs -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none text-sm font-jua">
+                <button onclick="filterCategory('all')" id="btn-cat-all" class="cat-btn active flex-shrink-0 px-4 py-2 rounded-2xl bg-amber-500 text-white shadow-md transition active:scale-95">
+                    ✨ 전체보기 (50)
+                </button>
+                <button onclick="filterCategory('문학')" id="btn-cat-문학" class="cat-btn flex-shrink-0 px-4 py-2 rounded-2xl bg-white text-slate-700 hover:bg-blue-50 border border-slate-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-lit inline-block"></span> 문학/동화 (15)
+                </button>
+                <button onclick="filterCategory('과학')" id="btn-cat-과학" class="cat-btn flex-shrink-0 px-4 py-2 rounded-2xl bg-white text-slate-700 hover:bg-emerald-50 border border-slate-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-sci inline-block"></span> 과학/환경 (10)
+                </button>
+                <button onclick="filterCategory('역사')" id="btn-cat-역사" class="cat-btn flex-shrink-0 px-4 py-2 rounded-2xl bg-white text-slate-700 hover:bg-orange-50 border border-slate-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-his inline-block"></span> 역사/인물 (10)
+                </button>
+                <button onclick="filterCategory('사회')" id="btn-cat-사회" class="cat-btn flex-shrink-0 px-4 py-2 rounded-2xl bg-white text-slate-700 hover:bg-purple-50 border border-slate-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-soc inline-block"></span> 사회/철학 (8)
+                </button>
+                <button onclick="filterCategory('예술')" id="btn-cat-예술" class="cat-btn flex-shrink-0 px-4 py-2 rounded-2xl bg-white text-slate-700 hover:bg-pink-50 border border-slate-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-art inline-block"></span> 예술/창의 (7)
+                </button>
+            </div>
+
+            <!-- Search & Sub Filter -->
+            <div class="flex items-center justify-between gap-2">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-input" oninput="handleSearch()" placeholder="책 제목이나 지은이 검색..." class="w-full pl-10 pr-4 py-2.5 bg-white rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm shadow-sm">
+                </div>
+                <button onclick="toggleUnreadOnly()" id="btn-unread-toggle" class="px-3.5 py-2.5 bg-white border border-amber-200 rounded-2xl text-xs font-bold text-slate-600 hover:bg-amber-50 shadow-sm transition flex items-center gap-1.5 flex-shrink-0">
+                    <i class="fa-regular fa-square text-amber-500"></i> 안 읽은 책만
+                </button>
+            </div>
+        </section>
+
+        <!-- Book List Grid (50 Items) -->
+        <section id="book-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Dynamically populated via JS -->
+        </section>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12 bg-white/60 rounded-3xl border border-dashed border-amber-300">
+            <i class="fa-solid fa-book-open-reader text-4xl text-amber-300 mb-2"></i>
+            <p class="font-jua text-lg text-slate-600">조건에 맞는 책이 없어요!</p>
+            <p class="text-xs text-slate-400">검색어를 확인하거나 필터를 변경해 보세요.</p>
+        </div>
+
+    </main>
+
+    <!-- Modal Dialog for Completion Reset Confirmation -->
+    <div id="reset-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-amber-100">
+            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 class="font-jua text-xl text-slate-800">모든 도장과 퍼즐을 초기화할까요?</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                지금까지 읽은 독서 기록이 모두 지워지고 퍼즐이 다시 덮입니다. 이 작업은 되돌릴 수 없어요!
+            </p>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-700 font-jua rounded-2xl hover:bg-slate-200 transition">취소</button>
+                <button onclick="executeReset()" class="flex-1 py-2.5 bg-red-500 text-white font-jua rounded-2xl hover:bg-red-600 shadow-md transition">리셋하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Celebration Modal (When 50/50 finished) -->
+    <div id="congrat-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-gradient-to-b from-amber-50 to-orange-100 rounded-3xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl border-4 border-amber-300">
+            <div class="text-6xl animate-bounce">👑</div>
+            <h3 class="font-jua text-3xl text-amber-900">대단해요! 50권 완전 정복!</h3>
+            <p class="text-sm text-slate-700 font-semibold leading-relaxed">
+                초등 고학년 추천도서 50권을 모두 완독하셨습니다!<br>
+                당신은 진정한 <strong class="text-amber-700 font-bold">독서 탐험왕</strong>입니다! 🎈📚✨
+            </p>
+            <div class="pt-2">
+                <button onclick="closeCongratModal()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-jua text-lg rounded-2xl shadow-lg hover:from-amber-600 hover:to-orange-600 transition transform active:scale-95">
+                    멋진 퍼즐 감상하기 🎨
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 50 Curated Recommended Books for Upper Elementary (Grades 4-6)
+        const booksData = [
+            // 문학/동화 (15권)
+            { id: 1, title: "자전거 도둑", author: "박완서", category: "문학" },
+            { id: 2, title: "마당을 나온 암탉", author: "황선미", category: "문학" },
+            { id: 3, title: "몽실언니", author: "권정생", category: "문학" },
+            { id: 4, title: "초정리 편지", author: "배유안", category: "문학" },
+            { id: 5, title: "수일이와 수일이", author: "김우경", category: "문학" },
+            { id: 6, title: "불량 여우 신사", author: "아놀드 로벨", category: "문학" },
+            { id: 7, title: "책 먹는 여우", author: "프란치스카 비어만", category: "문학" },
+            { id: 8, title: "모모", author: "미하엘 엔데", category: "문학" },
+            { id: 9, title: "원더 (Wonder)", author: "R.J. 팔라시오", category: "문학" },
+            { id: 10, title: "찰리와 초콜릿 공장", author: "로알드 달", category: "문학" },
+            { id: 11, title: "지혜로운 아기 양과 늑대", author: "이현", category: "문학" },
+            { id: 12, title: "푸른 사자 와니니", author: "이현", category: "문학" },
+            { id: 13, title: "아몬드 (청소년/고학년판)", author: "손원평", category: "문학" },
+            { id: 14, title: "나쁜 어린이 표", author: "황선미", category: "문학" },
+            { id: 15, title: "비밀의 화원", author: "프랜시스 호지슨 버넷", category: "문학" },
+
+            // 과학/환경 (10권)
+            { id: 16, title: "파브르 곤충기", author: "장 앙리 파브르", category: "과학" },
+            { id: 17, title: "코스모스 (어린이 과학 탐험)", author: "칼 세이건 원작", category: "과학" },
+            { id: 18, title: "지구에서 살아남기", author: "김남길", category: "과학" },
+            { id: 19, title: "소중한 지구를 지키는 환경 이야기", author: "박경화", category: "과학" },
+            { id: 20, title: "슬기로운 인공지능 탐구", author: "이성규", category: "과학" },
+            { id: 21, title: "인체 탐험 놀이 대작전", author: "카롤린 펠리시에", category: "과학" },
+            { id: 22, title: "위험한 과학 책", author: "랜들 먼로", category: "과학" },
+            { id: 23, title: "멸종위기 동물을 구하라", author: "장순근", category: "과학" },
+            { id: 24, title: "세상의 모든 궁금증을 푸는 물리", author: "정완상", category: "과학" },
+            { id: 25, title: "바다의 비밀 사전", author: "클레르 르뇌프", category: "과학" },
+
+            // 역사/인물 (10권)
+            { id: 26, title: "용선생의 시끌벅적 한국사", author: "금현진 외", category: "역사" },
+            { id: 27, title: "백범 일지 (어린이용)", author: "김구", category: "역사" },
+            { id: 28, title: "난중일기 (어린이용)", author: "이순신", category: "역사" },
+            { id: 29, title: "세종대왕과 집현전 학자들", author: "김은빈", category: "역사" },
+            { id: 30, title: "역사를 바꾼 위대한 인물들", author: "스티브 파커", category: "역사" },
+            { id: 31, title: "어린이 조선왕조실록", author: "박은봉", category: "역사" },
+            { id: 32, title: "안네의 일기", author: "안네 프랑크", category: "역사" },
+            { id: 33, title: "세계사를 바꾼 10가지 사건", author: "김성환", category: "역사" },
+            { id: 34, title: "유관순과 독립운동가 이야기", author: "이향안", category: "역사" },
+            { id: 35, title: "한성전차와 근대 사회 이야기", author: "장슬기", category: "역사" },
+
+            // 사회/철학 (8권)
+            { id: 36, title: "어린이를 위한 정의란 무엇인가", author: "마이클 샌델 원작", category: "사회" },
+            { id: 37, title: "열두 달 경제 이야기", author: "김경희", category: "사회" },
+            { id: 38, title: "세계의 어린이 인권 이야기", author: "알랭 세르", category: "사회" },
+            { id: 39, title: "세상을 바꾼 법 이야기", author: "곽한영", category: "사회" },
+            { id: 40, title: "생각하는 힘을 키우는 철학 학교", author: "오스카 브르니피에", category: "사회" },
+            { id: 41, title: "가짜 뉴스를 판별하는 어린이 신문 읽기", author: "최유리", category: "사회" },
+            { id: 42, title: "슬기로운 미디어 생활", author: "이희복", category: "사회" },
+            { id: 43, title: "함께 살아가는 다문화 사회", author: "민하나", category: "사회" },
+
+            // 예술/창의 (7권)
+            { id: 44, title: "방구석 미술관 (어린이 예술 탐험)", author: "조원재", category: "예술" },
+            { id: 45, title: "클래식 음악이 좋아지는 그림책", author: "마티아스 예슈케", category: "예술" },
+            { id: 46, title: "세계 건축의 위대한 순간들", author: "패트릭 딜런", category: "예술" },
+            { id: 47, title: "어린이 디자인 학교", author: "이정아", category: "예술" },
+            { id: 48, title: "그림으로 보는 오페라와 발레", author: "세실 일린", category: "예술" },
+            { id: 49, title: "세상을 표현하는 창의적 칼라 북", author: "헤르베 튈레", category: "예술" },
+            { id: 50, title: "상상력을 넓히는 현대 미술 이야기", author: "스ージー 호지", category: "예술" }
+        ];
+
+        // Category Configuration & Colors
+        const categoryConfig = {
+            "문학": { color: "bg-blue-500", text: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200", badge: "bg-blue-100 text-blue-800" },
+            "과학": { color: "bg-emerald-500", text: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200", badge: "bg-emerald-100 text-emerald-800" },
+            "역사": { color: "bg-orange-500", text: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200", badge: "bg-orange-100 text-orange-800" },
+            "사회": { color: "bg-purple-500", text: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", badge: "bg-purple-100 text-purple-800" },
+            "예술": { color: "bg-pink-500", text: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", badge: "bg-pink-100 text-pink-800" }
+        };
+
+        // State variables
+        let readStatus = {}; // { 1: true, 2: false, ... }
+        let currentCategory = 'all';
+        let showUnreadOnly = false;
+        let searchQuery = '';
+
+        // Initialize App
+        window.onload = function() {
+            loadSavedData();
+            renderPuzzleGrid();
+            renderBookList();
+            updateProgress();
+        };
+
+        // Load saved state from LocalStorage
+        function loadSavedData() {
+            try {
+                const saved = localStorage.getItem('elementary_reading_tracker_v1');
+                if (saved) {
+                    readStatus = JSON.parse(saved);
+                } else {
+                    readStatus = {};
+                }
+            } catch (e) {
+                console.error("Failed to load local storage:", e);
+                readStatus = {};
+            }
+        }
+
+        // Save state to LocalStorage
+        function saveData() {
+            try {
+                localStorage.setItem('elementary_reading_tracker_v1', JSON.stringify(readStatus));
+            } catch (e) {
+                console.error("Failed to save local storage:", e);
+            }
+        }
+
+        // Render 50 Puzzle Tiles
+        function renderPuzzleGrid() {
+            const grid = document.getElementById('puzzle-grid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 50; i++) {
+                const tile = document.createElement('div');
+                const isCleared = !!readStatus[i];
+                
+                // Pastel grid tile pattern colors
+                const colorIndex = (i % 5);
+                const tileColors = ['bg-amber-100', 'bg-orange-100', 'bg-yellow-100', 'bg-emerald-100', 'bg-teal-100'];
+                const tileColorClass = tileColors[colorIndex];
+
+                tile.className = `puzzle-tile flex flex-col items-center justify-center border border-white/40 font-jua text-xs text-amber-900/60 font-bold select-none cursor-pointer ${tileColorClass} ${isCleared ? 'cleared' : ''}`;
+                tile.id = `puzzle-tile-${i}`;
+                tile.innerHTML = `
+                    <span>${i}</span>
+                    <i class="fa-solid fa-lock text-[9px] opacity-40 mt-0.5"></i>
+                `;
+                
+                // Allow clicking tile to scroll to book
+                tile.onclick = () => {
+                    const el = document.getElementById(`book-item-${i}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.classList.add('ring-4', 'ring-amber-400');
+                        setTimeout(() => el.classList.remove('ring-4', 'ring-amber-400'), 1500);
+                    }
+                };
+
+                grid.appendChild(tile);
+            }
+        }
+
+        // Render 50 Books List
+        function renderBookList() {
+            const listContainer = document.getElementById('book-list');
+            const emptyState = document.getElementById('empty-state');
+            listContainer.innerHTML = '';
+
+            const filteredBooks = booksData.filter(book => {
+                const matchesCat = (currentCategory === 'all' || book.category === currentCategory);
+                const matchesUnread = !showUnreadOnly || !readStatus[book.id];
+                const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      book.author.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesCat && matchesUnread && matchesSearch;
+            });
+
+            if (filteredBooks.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filteredBooks.forEach(book => {
+                const isRead = !!readStatus[book.id];
+                const catInfo = categoryConfig[book.category];
+
+                const card = document.createElement('div');
+                card.id = `book-item-${book.id}`;
+                card.className = `glass-card rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm transition-all duration-300 border-2 ${isRead ? 'bg-emerald-50/70 border-emerald-300' : 'hover:border-amber-300 border-white'}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                        <!-- Number Badge -->
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-jua text-base flex-shrink-0 ${isRead ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-800'}">
+                            ${book.id}
+                        </div>
+
+                        <!-- Book Title & Author -->
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md ${catInfo.badge}">
+                                    ${book.category}
+                                </span>
+                                ${isRead ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 flex items-center gap-1"><i class="fa-solid fa-check"></i> 완독</span>' : ''}
+                            </div>
+                            <h3 class="font-jua text-base md:text-lg text-slate-800 leading-snug truncate ${isRead ? 'line-through text-slate-400' : ''}">
+                                ${book.title}
+                            </h3>
+                            <p class="text-xs text-slate-500 font-semibold truncate">
+                                <i class="fa-regular fa-user text-[10px] mr-1"></i>${book.author}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Stamp / Check Toggle Button -->
+                    <button onclick="toggleRead(${book.id})" class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl border-2 transition-transform active:scale-90 ${isRead ? 'bg-gradient-to-br from-emerald-400 to-teal-500 border-emerald-400 text-white shadow-md' : 'bg-white border-amber-200 text-slate-300 hover:border-amber-400 hover:text-amber-400 shadow-sm'}">
+                        ${isRead 
+                            ? `<div class="stamp-animation flex flex-col items-center"><i class="fa-solid fa-stamp text-xl"></i><span class="font-jua text-[10px] mt-0.5">참잘했어요</span></div>` 
+                            : `<i class="fa-solid fa-stamp text-xl"></i><span class="font-jua text-[10px] mt-0.5 text-slate-400">도장찍기</span>`
+                        }
+                    </button>
+                `;
+
+                listContainer.appendChild(card);
+            });
+        }
+
+        // Toggle Read / Unread Status
+        function toggleRead(id) {
+            const prevCount = Object.values(readStatus).filter(Boolean).length;
+            readStatus[id] = !readStatus[id];
+            saveData();
+
+            // Update Single Puzzle Tile
+            const tile = document.getElementById(`puzzle-tile-${id}`);
+            if (tile) {
+                if (readStatus[id]) {
+                    tile.classList.add('cleared');
+                } else {
+                    tile.classList.remove('cleared');
+                }
+            }
+
+            renderBookList();
+            updateProgress();
+
+            const newCount = Object.values(readStatus).filter(Boolean).length;
+
+            // Trigger Confetti if completed 50 books!
+            if (newCount === 50 && prevCount < 50) {
+                triggerConfetti();
+                setTimeout(() => {
+                    document.getElementById('congrat-modal').classList.remove('hidden');
+                }, 600);
+            }
+        }
+
+        // Update Progress Bar and Counter
+        function updateProgress() {
+            const readCount = Object.values(readStatus).filter(Boolean).length;
+            const percentage = Math.round((readCount / 50) * 100);
+
+            document.getElementById('read-count').innerText = readCount;
+            document.getElementById('progress-percent').innerText = `${percentage}%`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        // Category Filter Navigation
+        function filterCategory(cat) {
+            currentCategory = cat;
+            
+            // Update Tab Styles
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-500', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'text-slate-700', 'border', 'border-slate-200', 'shadow-sm');
+            });
+
+            const targetBtn = document.getElementById(`btn-cat-${cat}`);
+            if (targetBtn) {
+                targetBtn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+                targetBtn.classList.add('bg-amber-500', 'text-white', 'shadow-md');
+            }
+
+            renderBookList();
+        }
+
+        // Search Filter
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value;
+            renderBookList();
+        }
+
+        // Toggle Unread Only Filter
+        function toggleUnreadOnly() {
+            showUnreadOnly = !showUnreadOnly;
+            const btn = document.getElementById('btn-unread-toggle');
+            if (showUnreadOnly) {
+                btn.classList.add('bg-amber-500', 'text-white', 'border-amber-500');
+                btn.classList.remove('bg-white', 'text-slate-600');
+                btn.innerHTML = `<i class="fa-solid fa-square-check"></i> 안 읽은 책만`;
+            } else {
+                btn.classList.remove('bg-amber-500', 'text-white', 'border-amber-500');
+                btn.classList.add('bg-white', 'text-slate-600');
+                btn.innerHTML = `<i class="fa-regular fa-square text-amber-500"></i> 안 읽은 책만`;
+            }
+            renderBookList();
+        }
+
+        // Reset Confirmation Dialogs
+        function confirmReset() {
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function executeReset() {
+            readStatus = {};
+            saveData();
+            renderPuzzleGrid();
+            renderBookList();
+            updateProgress();
+            closeResetModal();
+        }
+
+        function closeCongratModal() {
+            document.getElementById('congrat-modal').classList.add('hidden');
+        }
+
+        // Confetti Celebration Effect
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
