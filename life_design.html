@@ -8,11 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Gaegu, Noto Sans KR) -->
+    <!-- Web Fonts: Pretendard & Gaegu -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- html2canvas for Image Download -->
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+    <!-- html2canvas for High-Res Image Download -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
@@ -29,13 +30,12 @@
                             500: '#14B8A6',
                             600: '#0D9488',
                             700: '#0F766E',
-                            dark: '#115E59'
-                        },
-                        pastelYellow: '#FEF08A',
-                        pastelPink: '#FCE7F3',
+                            800: '#115E59',
+                            900: '#134E4A'
+                        }
                     },
                     fontFamily: {
-                        sans: ['Noto Sans KR', 'sans-serif'],
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
                         cute: ['Gaegu', 'cursive'],
                     }
                 }
@@ -44,301 +44,380 @@
     </script>
 
     <style>
-        /* Custom Customizations */
+        /* 귀여운 도트 패턴 민트 배경 */
         body {
             background-color: #E8F8F5;
-            background-image: radial-gradient(#2DD4BF 0.6px, transparent 0.6px), radial-gradient(#2DD4BF 0.6px, #E8F8F5 0.6px);
+            background-image: radial-gradient(#2DD4BF 0.75px, transparent 0.75px), radial-gradient(#2DD4BF 0.75px, #E8F8F5 0.75px);
             background-size: 24px 24px;
             background-position: 0 0, 12px 12px;
         }
 
+        /* 다이어리 카드 스타일 */
         .diary-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(10px);
             border: 2px solid #99F6E4;
-            box-shadow: 0 10px 25px -5px rgba(20, 184, 166, 0.15), 0 8px 10px -6px rgba(20, 184, 166, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(20, 184, 166, 0.14), 0 8px 10px -6px rgba(20, 184, 166, 0.08);
         }
 
+        /* 편지지 줄무늬 배경 */
         .letter-lines {
             background-image: repeating-linear-gradient(transparent, transparent 31px, #CCFBF1 31px, #CCFBF1 32px);
             line-height: 32px;
         }
 
-        /* Image Export Styling - Fits into A4 Portrait Proportion */
-        .export-mode {
-            width: 800px !important;
-            max-width: 800px !important;
-            min-height: 1130px !important;
+        /* A4 세로 한 장 최적화 캡처 전용 스타일 (1 : 1.414 비율 유지) */
+        .a4-capture-mode {
+            width: 840px !important;
+            max-width: 840px !important;
+            min-height: 1188px !important;
             margin: 0 auto !important;
-            padding: 24px !important;
-            background: #F0FDF9 !important;
+            padding: 26px 28px !important;
+            background-color: #F0FDF9 !important;
+            background-image: radial-gradient(#99F6E4 0.8px, transparent 0.8px) !important;
+            background-size: 18px 18px !important;
             box-sizing: border-box !important;
         }
 
-        .export-mode .diary-card {
-            margin-bottom: 16px !important;
-            padding: 16px !important;
+        .a4-capture-mode .diary-card {
+            margin-bottom: 14px !important;
+            padding: 16px 20px !important;
             box-shadow: none !important;
-            border-width: 1.5px !important;
+            border: 1.5px solid #5EEAD4 !important;
+            border-radius: 20px !important;
         }
 
-        .export-mode textarea, .export-mode input {
-            border: 1px solid #99F6E4 !important;
-            background-color: #FFFFFF !important;
+        .a4-capture-mode .table-wrapper {
+            overflow: visible !important;
+            min-width: 100% !important;
+        }
+
+        .a4-capture-mode .no-capture {
+            display: none !important;
         }
     </style>
 </head>
-<body class="text-slate-800 font-sans pb-16 min-h-screen antialiased">
+<body class="text-slate-800 font-sans pb-24 min-h-screen antialiased selection:bg-mint-200 selection:text-mint-900">
 
-    <!-- Top Sticky Header with Progress Bar -->
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b-2 border-mint-200 shadow-sm no-print">
+    <!-- 상단 고정 진행 상황 바 (Sticky Progress Bar) -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-2 border-mint-200 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-3">
-            <div class="flex justify-between items-center mb-2">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
                 <div class="flex items-center space-x-2">
-                    <span class="text-2xl">🌱</span>
-                    <h1 class="font-bold text-mint-700 text-lg md:text-xl font-cute">내 삶의 주인이 되는 생애설계 다이어리</h1>
+                    <span class="text-2xl animate-bounce">🌱</span>
+                    <h1 class="font-bold text-mint-700 text-lg md:text-2xl font-cute tracking-wide">
+                        내 삶의 주인이 되는 생애설계 다이어리
+                    </h1>
                 </div>
-                <div id="progressText" class="text-xs md:text-sm font-bold text-mint-600 bg-mint-50 px-3 py-1 rounded-full border border-mint-200">
-                    진행률: 0%
+                <div class="flex items-center space-x-2">
+                    <span class="hidden sm:inline-flex items-center text-xs text-mint-600 bg-mint-50 px-2.5 py-1 rounded-full border border-mint-200">
+                        <i class="fa-solid fa-cloud-check mr-1"></i> 자동 저장됨
+                    </span>
+                    <div id="progressText" class="text-xs md:text-sm font-extrabold text-white bg-mint-500 px-3.5 py-1 rounded-full shadow-sm">
+                        진행률: 0%
+                    </div>
                 </div>
             </div>
 
-            <!-- Progress Bar -->
-            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-mint-200">
-                <div id="progressBar" class="bg-gradient-to-r from-mint-300 to-mint-500 h-3 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+            <!-- 프로그레스 바 -->
+            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-mint-200 p-0.5">
+                <div id="progressBar" class="bg-gradient-to-r from-mint-300 via-mint-400 to-teal-500 h-full rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
             </div>
 
-            <!-- Step Navigation Tabs -->
-            <div class="flex justify-between mt-3 text-xs md:text-sm">
-                <button onclick="scrollToStep(1)" class="step-btn px-2 py-1 rounded-lg font-medium transition-all text-mint-700 bg-mint-100 border border-mint-300 hover:bg-mint-200">1단계: 가치관</button>
-                <button onclick="scrollToStep(2)" class="step-btn px-2 py-1 rounded-lg font-medium transition-all text-slate-500 hover:bg-mint-50">2단계: 영역별 목표</button>
-                <button onclick="scrollToStep(3)" class="step-btn px-2 py-1 rounded-lg font-medium transition-all text-slate-500 hover:bg-mint-50">3단계: 비전 선언문</button>
-                <button onclick="scrollToStep(4)" class="step-btn px-2 py-1 rounded-lg font-medium transition-all text-slate-500 hover:bg-mint-50">4단계: 미래 편지</button>
+            <!-- 단계별 완료 뱃지 및 이동 네비게이션 -->
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-2 mt-2.5 text-xs md:text-sm">
+                <button type="button" onclick="scrollToStep(1)" id="nav_step_1" class="step-nav-btn py-1.5 px-2 rounded-xl font-bold transition-all bg-mint-50 text-mint-700 border border-mint-200 hover:bg-mint-100 flex items-center justify-center gap-1">
+                    <span class="badge-icon">1️⃣</span>
+                    <span class="truncate">가치관 탐색</span>
+                </button>
+                <button type="button" onclick="scrollToStep(2)" id="nav_step_2" class="step-nav-btn py-1.5 px-2 rounded-xl font-bold transition-all bg-slate-50 text-slate-500 border border-slate-200 hover:bg-mint-50 flex items-center justify-center gap-1">
+                    <span class="badge-icon">2️⃣</span>
+                    <span class="truncate">영역별 설계</span>
+                </button>
+                <button type="button" onclick="scrollToStep(3)" id="nav_step_3" class="step-nav-btn py-1.5 px-2 rounded-xl font-bold transition-all bg-slate-50 text-slate-500 border border-slate-200 hover:bg-mint-50 flex items-center justify-center gap-1">
+                    <span class="badge-icon">3️⃣</span>
+                    <span class="truncate">비전·버킷</span>
+                </button>
+                <button type="button" onclick="scrollToStep(4)" id="nav_step_4" class="step-nav-btn py-1.5 px-2 rounded-xl font-bold transition-all bg-slate-50 text-slate-500 border border-slate-200 hover:bg-mint-50 flex items-center justify-center gap-1">
+                    <span class="badge-icon">4️⃣</span>
+                    <span class="truncate">미래 편지</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <div id="pdfArea" class="max-w-4xl mx-auto px-4 pt-6 space-y-8">
+    <!-- 메인 학습지 컨테이너 (A4 이미지 캡처 대상 영역) -->
+    <main id="captureArea" class="max-w-4xl mx-auto px-4 pt-6 space-y-6">
 
-        <!-- Title Banner Section -->
-        <div class="diary-card rounded-3xl p-6 md:p-8 text-center relative overflow-hidden bg-gradient-to-br from-white via-mint-50 to-mint-100">
-            <div class="absolute -right-6 -bottom-6 text-mint-200 text-8xl opacity-40 select-none pointer-events-none">
+        <!-- 타이틀 & 학생 정보 헤더 카드 -->
+        <div class="diary-card rounded-3xl p-6 md:p-8 text-center relative overflow-hidden bg-gradient-to-br from-white via-mint-50/70 to-teal-50">
+            <!-- 귀여운 스티커 느낌 장식 -->
+            <div class="absolute top-4 left-5 text-2xl opacity-80 select-none pointer-events-none">🍀</div>
+            <div class="absolute top-4 right-5 text-2xl opacity-80 select-none pointer-events-none">✨</div>
+            <div class="absolute -right-6 -bottom-6 text-mint-200 text-8xl opacity-35 select-none pointer-events-none">
                 <i class="fa-solid fa-compass"></i>
             </div>
-            <span class="inline-block bg-mint-500 text-white font-bold text-xs md:text-sm px-4 py-1.5 rounded-full mb-3 shadow-sm">
-                🎓 중학교 3학년 진로 탐색 프로젝트
-            </span>
-            <h1 class="text-2xl md:text-4xl font-extrabold text-slate-800 mb-2 font-cute">
-                ✨ 나만의 미래 지도 : 생애설계 다이어리 ✨
-            </h1>
-            <p class="text-slate-600 text-xs md:text-sm mb-6">내가 꿈꾸는 삶의 방향을 스스로 설계하고 기록해 봅시다.</p>
 
-            <!-- Student Info Box -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/80 p-4 rounded-2xl border border-mint-200 text-left">
+            <span class="inline-block bg-mint-500 text-white font-bold text-xs md:text-sm px-4 py-1 rounded-full mb-2.5 shadow-sm">
+                🎓 중학교 3학년 생애설계와 진로 탐색
+            </span>
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-1.5 font-cute">
+                ✨ 나만의 미래 지도 : 생애설계 다이어리 ✨
+            </h2>
+            <p class="text-slate-600 text-xs md:text-sm mb-5">
+                내가 소중히 여기는 가치를 발견하고, 앞으로 살아갈 멋진 인생의 지도를 그려봅시다!
+            </p>
+
+            <!-- 학생 인적사항 입력란 (학년 / 반 / 번호 / 이름) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white/90 p-4 rounded-2xl border-2 border-mint-200 text-left shadow-sm">
                 <div>
-                    <label class="block text-xs font-bold text-mint-700 mb-1">학년 / 반 / 번호</label>
-                    <input type="text" id="info_class" oninput="saveData()" placeholder="예: 3학년 2반 15번" class="w-full bg-mint-50/50 border border-mint-200 rounded-xl px-3 py-1.5 text-sm focus:ring-2 focus:ring-mint-400 focus:outline-none">
+                    <label class="block text-xs font-bold text-mint-700 mb-1">학년</label>
+                    <input type="text" id="info_grade" oninput="saveData()" placeholder="예: 3학년" 
+                        class="w-full bg-mint-50/60 border border-mint-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-mint-400 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-mint-700 mb-1">반</label>
+                    <input type="text" id="info_class" oninput="saveData()" placeholder="예: 2반" 
+                        class="w-full bg-mint-50/60 border border-mint-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-mint-400 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-mint-700 mb-1">번호</label>
+                    <input type="text" id="info_number" oninput="saveData()" placeholder="예: 15번" 
+                        class="w-full bg-mint-50/60 border border-mint-200 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-mint-400 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-mint-700 mb-1">이름</label>
-                    <input type="text" id="info_name" oninput="saveData()" placeholder="이름을 입력하세요" class="w-full bg-mint-50/50 border border-mint-200 rounded-xl px-3 py-1.5 text-sm focus:ring-2 focus:ring-mint-400 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-mint-700 mb-1">작성일</label>
-                    <input type="date" id="info_date" onchange="saveData()" class="w-full bg-mint-50/50 border border-mint-200 rounded-xl px-3 py-1.5 text-sm focus:ring-2 focus:ring-mint-400 focus:outline-none">
+                    <input type="text" id="info_name" oninput="saveData()" placeholder="이름 입력" 
+                        class="w-full bg-mint-50/60 border border-mint-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-mint-400 focus:outline-none">
                 </div>
             </div>
         </div>
 
-        <!-- 1단계: 가치관 선택 -->
-        <section id="step1" class="diary-card rounded-3xl p-6 md:p-8 relative">
-            <div class="flex items-center space-x-3 mb-4">
-                <span class="w-8 h-8 md:w-10 md:h-10 rounded-2xl bg-mint-500 text-white font-bold flex items-center justify-center text-sm md:text-base shadow-md">1</span>
-                <div>
-                    <h2 class="text-lg md:text-xl font-bold text-slate-800">내가 가장 중요하게 생각하는 것 (가치관 선택)</h2>
-                    <p class="text-xs md:text-sm text-slate-500">인생에서 소중히 여기는 가치관을 선택하고, 그 이유를 적어보세요.</p>
+        <!-- 1단계: 내가 가장 중요하게 생각하는 것 (가치관 선택) -->
+        <section id="step1" class="diary-card rounded-3xl p-6 md:p-8 relative scroll-mt-32">
+            <div class="flex items-start sm:items-center justify-between gap-2 mb-4">
+                <div class="flex items-center space-x-3">
+                    <span class="w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-2xl bg-gradient-to-br from-mint-400 to-teal-500 text-white font-extrabold flex items-center justify-center text-base md:text-lg shadow-md">1</span>
+                    <div>
+                        <h3 class="text-lg md:text-xl font-extrabold text-slate-800">내가 가장 중요하게 생각하는 것 (가치관 선택)</h3>
+                        <p class="text-xs md:text-sm text-slate-500">나에게 중요한 가치관을 자유롭게 선택하고, 그 이유를 아래에 작성해 보세요.</p>
+                    </div>
+                </div>
+                <span id="step1_status" class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">미완료</span>
+            </div>
+
+            <!-- 8가지 가치관 선택 버튼 그리드 -->
+            <div class="mb-5">
+                <p class="text-xs font-bold text-mint-700 mb-2.5 flex items-center">
+                    <span class="mr-1">💡</span> 아래 가치관 카드를 클릭하면 이유 입력란이 나타납니다. (다시 누르면 해제)
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="valueChips">
+                    <!-- JS로 동적 생성 -->
                 </div>
             </div>
 
-            <!-- Value Chips Container -->
-            <div class="mb-6">
-                <label class="block text-xs font-bold text-mint-700 mb-2">💡 원하는 가치관을 클릭하여 선택해보세요!</label>
-                <div class="flex flex-wrap gap-2 md:gap-3" id="valueChips">
-                    <!-- Dynamic chips generated via JS -->
-                </div>
-            </div>
-
-            <!-- Dynamic Reason Inputs Section -->
-            <div id="valueReasonsContainer" class="space-y-4">
-                <div class="text-center py-6 text-slate-400 text-sm bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    상단의 가치관 버튼을 선택하면 이유를 입력할 수 있는 칸이 생깁니다! 🙂
+            <!-- 선택된 가치관 이유 입력 영역 -->
+            <div id="valueReasonsContainer" class="space-y-3">
+                <div class="text-center py-6 text-slate-400 text-xs md:text-sm bg-mint-50/40 rounded-2xl border-2 border-dashed border-mint-200">
+                    위에서 내가 중요하게 생각하는 가치관을 클릭해 보세요! ✨
                 </div>
             </div>
         </section>
 
-        <!-- 2단계: 영역별 생애 목표 및 실행 방안 -->
-        <section id="step2" class="diary-card rounded-3xl p-6 md:p-8 relative overflow-x-auto">
-            <div class="flex items-center space-x-3 mb-4">
-                <span class="w-8 h-8 md:w-10 md:h-10 rounded-2xl bg-mint-500 text-white font-bold flex items-center justify-center text-sm md:text-base shadow-md">2</span>
-                <div>
-                    <h2 class="text-lg md:text-xl font-bold text-slate-800">영역별 생애 목표 및 실행 방안</h2>
-                    <p class="text-xs md:text-sm text-slate-500">직업, 건강, 경제적 자립 3가지 영역에서 시기별 목표와 실행 방안을 작성해보세요.</p>
+        <!-- 2단계: 영역별 생애 설계 (표 형태) -->
+        <section id="step2" class="diary-card rounded-3xl p-6 md:p-8 relative scroll-mt-32">
+            <div class="flex items-start sm:items-center justify-between gap-2 mb-4">
+                <div class="flex items-center space-x-3">
+                    <span class="w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-2xl bg-gradient-to-br from-mint-400 to-teal-500 text-white font-extrabold flex items-center justify-center text-base md:text-lg shadow-md">2</span>
+                    <div>
+                        <h3 class="text-lg md:text-xl font-extrabold text-slate-800">영역별 생애 설계</h3>
+                        <p class="text-xs md:text-sm text-slate-500">직업, 건강, 경제적 자립 영역별로 생애 목표와 생애 주기별 실행 방안을 세워봅시다.</p>
+                    </div>
                 </div>
+                <span id="step2_status" class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">0 / 18칸</span>
             </div>
 
-            <!-- Table Format -->
-            <div class="min-w-[700px]">
-                <table class="w-full border-collapse border border-mint-200 rounded-2xl overflow-hidden text-sm">
+            <!-- 반응형 표 컨테이너 -->
+            <div class="overflow-x-auto rounded-2xl border-2 border-mint-200 table-wrapper">
+                <table class="w-full min-w-[740px] border-collapse text-xs md:text-sm">
                     <thead>
-                        <tr class="bg-mint-500 text-white text-center font-bold">
-                            <th class="p-3 border border-mint-400 w-24">영역</th>
-                            <th class="p-3 border border-mint-400 w-36">생애 목표</th>
-                            <th class="p-3 border border-mint-400 w-36">하위 영역 목표</th>
-                            <th class="p-3 border border-mint-400">청소년기 (현재~10대)</th>
-                            <th class="p-3 border border-mint-400">성년기 (20~30대)</th>
-                            <th class="p-3 border border-mint-400">중년기 (40~50대)</th>
-                            <th class="p-3 border border-mint-400">노년기 (60대 이상)</th>
+                        <tr class="bg-gradient-to-r from-mint-500 to-teal-500 text-white text-center font-bold">
+                            <th class="p-2.5 border-r border-mint-400 w-24">영역</th>
+                            <th class="p-2.5 border-r border-mint-400 w-36">생애 목표</th>
+                            <th class="p-2.5 border-r border-mint-400 w-36">하위 영역 목표</th>
+                            <th class="p-2.5 border-r border-mint-400">청소년기<br><span class="text-[11px] font-normal text-mint-100">(10대)</span></th>
+                            <th class="p-2.5 border-r border-mint-400">성년기<br><span class="text-[11px] font-normal text-mint-100">(20~30대)</span></th>
+                            <th class="p-2.5 border-r border-mint-400">중년기<br><span class="text-[11px] font-normal text-mint-100">(40~50대)</span></th>
+                            <th class="p-2.5">노년기<br><span class="text-[11px] font-normal text-mint-100">(60대 이상)</span></th>
                         </tr>
                     </thead>
-                    <tbody id="goalsTableBody" class="bg-white">
-                        <!-- Dynamic Table Content Populated by JS -->
+                    <tbody id="goalsTableBody" class="bg-white divide-y divide-mint-200">
+                        <!-- JS로 동적 생성 -->
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- 3단계: 생애 비전 선언문 & 버킷리스트 -->
-        <section id="step3" class="diary-card rounded-3xl p-6 md:p-8 relative">
-            <div class="flex items-center space-x-3 mb-6">
-                <span class="w-8 h-8 md:w-10 md:h-10 rounded-2xl bg-mint-500 text-white font-bold flex items-center justify-center text-sm md:text-base shadow-md">3</span>
-                <div>
-                    <h2 class="text-lg md:text-xl font-bold text-slate-800">나의 생애 비전 선언문 & 버킷리스트</h2>
-                    <p class="text-xs md:text-sm text-slate-500">나의 삶을 대표하는 가치관과 살면서 꼭 이루고 싶은 일들을 적어보세요.</p>
+        <!-- 3단계: 나의 미래 비전 & 버킷리스트 -->
+        <section id="step3" class="diary-card rounded-3xl p-6 md:p-8 relative scroll-mt-32">
+            <div class="flex items-start sm:items-center justify-between gap-2 mb-5">
+                <div class="flex items-center space-x-3">
+                    <span class="w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-2xl bg-gradient-to-br from-mint-400 to-teal-500 text-white font-extrabold flex items-center justify-center text-base md:text-lg shadow-md">3</span>
+                    <div>
+                        <h3 class="text-lg md:text-xl font-extrabold text-slate-800">나의 미래 비전 & 버킷리스트</h3>
+                        <p class="text-xs md:text-sm text-slate-500">나를 이끌어줄 인생 좌우명과 20·30대에 꼭 이루고 싶은 버킷리스트 3가지를 적어보세요.</p>
+                    </div>
                 </div>
+                <span id="step3_status" class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">0 / 4칸</span>
             </div>
 
-            <!-- Vision Statement Box -->
-            <div class="bg-gradient-to-r from-mint-50 to-teal-50 p-6 rounded-2xl border border-mint-200 mb-6">
-                <label class="block text-sm font-bold text-mint-800 mb-2">
-                    📢 나의 인생 슬로건 / 비전 선언문
+            <!-- 인생 좌우명 (슬로건) -->
+            <div class="bg-gradient-to-r from-mint-50 via-teal-50/70 to-mint-50 p-4 md:p-5 rounded-2xl border border-mint-200 mb-5">
+                <label class="block text-xs md:text-sm font-extrabold text-mint-800 mb-2">
+                    📢 나의 인생 좌우명 (비전 슬로건)
                 </label>
                 <input type="text" id="vision_slogan" oninput="saveData()" 
-                    placeholder="예: '사람들에게 긍정적인 에너지를 주며 끊임없이 성장하는 보건의료 전문가가 되겠다!'" 
-                    class="w-full bg-white border border-mint-300 rounded-xl p-3 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-mint-400 focus:outline-none shadow-sm">
+                    placeholder="예: 오늘의 작은 노력이 내일의 빛나는 나를 만든다!" 
+                    class="w-full bg-white border border-mint-300 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-mint-400 focus:outline-none shadow-sm">
             </div>
 
-            <!-- Bucket List Items -->
+            <!-- 20·30대 버킷리스트 TOP 3 -->
             <div>
-                <h3 class="text-md font-bold text-slate-700 mb-3 flex items-center">
-                    <i class="fa-solid fa-list-check text-mint-500 mr-2"></i> 나의 인생 버킷리스트 TOP 3
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <h4 class="text-xs md:text-sm font-extrabold text-slate-700 mb-3 flex items-center">
+                    <span class="mr-1.5">🌈</span> 20대·30대에 꼭 이루고 싶은 나만의 버킷리스트 3가지
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                     <!-- Bucket 1 -->
-                    <div class="bg-white p-4 rounded-2xl border border-mint-200 shadow-sm hover:border-mint-400 transition-all">
+                    <div class="bg-white p-4 rounded-2xl border-2 border-mint-100 hover:border-mint-300 transition-all shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="bg-mint-100 text-mint-700 text-xs font-bold px-2 py-0.5 rounded-md">Bucket #1</span>
-                            <input type="text" id="bucket_age_1" oninput="saveData()" placeholder="목표 나이 (예: 25세)" class="w-24 text-right text-xs bg-slate-50 border border-slate-200 rounded px-1 py-0.5">
+                            <span class="bg-mint-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">Bucket #1</span>
+                            <input type="text" id="bucket_age_1" oninput="saveData()" placeholder="목표 나이 (예: 22세)" 
+                                class="w-28 text-right text-xs font-semibold text-mint-700 bg-mint-50 border border-mint-200 rounded-lg px-2 py-1 focus:outline-none">
                         </div>
-                        <input type="text" id="bucket_title_1" oninput="saveData()" placeholder="버킷리스트 내용" class="w-full font-bold text-sm border-b border-slate-200 pb-1 mb-2 focus:outline-none focus:border-mint-500">
-                        <textarea id="bucket_desc_1" oninput="saveData()" rows="2" placeholder="이루고 싶은 이유나 다짐" class="w-full text-xs text-slate-600 border-none bg-slate-50 p-2 rounded-lg resize-none focus:outline-none"></textarea>
+                        <input type="text" id="bucket_title_1" oninput="saveData()" placeholder="이루고 싶은 목표 제목" 
+                            class="w-full font-bold text-sm text-slate-800 border-b-2 border-mint-100 pb-1.5 mb-2 focus:outline-none focus:border-mint-400">
+                        <textarea id="bucket_desc_1" oninput="saveData()" rows="2" placeholder="실천 계획이나 이유를 적어보세요" 
+                            class="w-full text-xs text-slate-600 bg-slate-50 border border-slate-200 p-2 rounded-xl resize-none focus:outline-none focus:border-mint-300"></textarea>
                     </div>
 
                     <!-- Bucket 2 -->
-                    <div class="bg-white p-4 rounded-2xl border border-mint-200 shadow-sm hover:border-mint-400 transition-all">
+                    <div class="bg-white p-4 rounded-2xl border-2 border-mint-100 hover:border-mint-300 transition-all shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="bg-mint-100 text-mint-700 text-xs font-bold px-2 py-0.5 rounded-md">Bucket #2</span>
-                            <input type="text" id="bucket_age_2" oninput="saveData()" placeholder="목표 나이 (예: 30세)" class="w-24 text-right text-xs bg-slate-50 border border-slate-200 rounded px-1 py-0.5">
+                            <span class="bg-mint-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">Bucket #2</span>
+                            <input type="text" id="bucket_age_2" oninput="saveData()" placeholder="목표 나이 (예: 27세)" 
+                                class="w-28 text-right text-xs font-semibold text-mint-700 bg-mint-50 border border-mint-200 rounded-lg px-2 py-1 focus:outline-none">
                         </div>
-                        <input type="text" id="bucket_title_2" oninput="saveData()" placeholder="버킷리스트 내용" class="w-full font-bold text-sm border-b border-slate-200 pb-1 mb-2 focus:outline-none focus:border-mint-500">
-                        <textarea id="bucket_desc_2" oninput="saveData()" rows="2" placeholder="이루고 싶은 이유나 다짐" class="w-full text-xs text-slate-600 border-none bg-slate-50 p-2 rounded-lg resize-none focus:outline-none"></textarea>
+                        <input type="text" id="bucket_title_2" oninput="saveData()" placeholder="이루고 싶은 목표 제목" 
+                            class="w-full font-bold text-sm text-slate-800 border-b-2 border-mint-100 pb-1.5 mb-2 focus:outline-none focus:border-mint-400">
+                        <textarea id="bucket_desc_2" oninput="saveData()" rows="2" placeholder="실천 계획이나 이유를 적어보세요" 
+                            class="w-full text-xs text-slate-600 bg-slate-50 border border-slate-200 p-2 rounded-xl resize-none focus:outline-none focus:border-mint-300"></textarea>
                     </div>
 
                     <!-- Bucket 3 -->
-                    <div class="bg-white p-4 rounded-2xl border border-mint-200 shadow-sm hover:border-mint-400 transition-all">
+                    <div class="bg-white p-4 rounded-2xl border-2 border-mint-100 hover:border-mint-300 transition-all shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="bg-mint-100 text-mint-700 text-xs font-bold px-2 py-0.5 rounded-md">Bucket #3</span>
-                            <input type="text" id="bucket_age_3" oninput="saveData()" placeholder="목표 나이 (예: 40세)" class="w-24 text-right text-xs bg-slate-50 border border-slate-200 rounded px-1 py-0.5">
+                            <span class="bg-mint-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">Bucket #3</span>
+                            <input type="text" id="bucket_age_3" oninput="saveData()" placeholder="목표 나이 (예: 32세)" 
+                                class="w-28 text-right text-xs font-semibold text-mint-700 bg-mint-50 border border-mint-200 rounded-lg px-2 py-1 focus:outline-none">
                         </div>
-                        <input type="text" id="bucket_title_3" oninput="saveData()" placeholder="버킷리스트 내용" class="w-full font-bold text-sm border-b border-slate-200 pb-1 mb-2 focus:outline-none focus:border-mint-500">
-                        <textarea id="bucket_desc_3" oninput="saveData()" rows="2" placeholder="이루고 싶은 이유나 다짐" class="w-full text-xs text-slate-600 border-none bg-slate-50 p-2 rounded-lg resize-none focus:outline-none"></textarea>
+                        <input type="text" id="bucket_title_3" oninput="saveData()" placeholder="이루고 싶은 목표 제목" 
+                            class="w-full font-bold text-sm text-slate-800 border-b-2 border-mint-100 pb-1.5 mb-2 focus:outline-none focus:border-mint-400">
+                        <textarea id="bucket_desc_3" oninput="saveData()" rows="2" placeholder="실천 계획이나 이유를 적어보세요" 
+                            class="w-full text-xs text-slate-600 bg-slate-50 border border-slate-200 p-2 rounded-xl resize-none focus:outline-none focus:border-mint-300"></textarea>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 4단계: 10년 뒤 나에게 쓰는 편지 -->
-        <section id="step4" class="diary-card rounded-3xl p-6 md:p-8 relative">
-            <div class="flex items-center space-x-3 mb-4">
-                <span class="w-8 h-8 md:w-10 md:h-10 rounded-2xl bg-mint-500 text-white font-bold flex items-center justify-center text-sm md:text-base shadow-md">4</span>
-                <div>
-                    <h2 class="text-lg md:text-xl font-bold text-slate-800">10년 뒤 나에게 쓰는 편지</h2>
-                    <p class="text-xs md:text-sm text-slate-500">25살이 되어 있을 멋진 나에게 응원의 메시지를 작성해보세요.</p>
+        <!-- 4단계: 10년 뒤(25살)의 나에게 쓰는 편지 -->
+        <section id="step4" class="diary-card rounded-3xl p-6 md:p-8 relative scroll-mt-32">
+            <div class="flex items-start sm:items-center justify-between gap-2 mb-4">
+                <div class="flex items-center space-x-3">
+                    <span class="w-9 h-9 md:w-10 md:h-10 shrink-0 rounded-2xl bg-gradient-to-br from-mint-400 to-teal-500 text-white font-extrabold flex items-center justify-center text-base md:text-lg shadow-md">4</span>
+                    <div>
+                        <h3 class="text-lg md:text-xl font-extrabold text-slate-800">10년 뒤(25살)의 나에게 쓰는 편지</h3>
+                        <p class="text-xs md:text-sm text-slate-500">10년 후 어른이 되어 있을 나에게 전하고 싶은 응원과 다짐을 편지로 남겨보세요.</p>
+                    </div>
                 </div>
+                <span id="step4_status" class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">미완료</span>
             </div>
 
-            <!-- Letter Card Design -->
-            <div class="bg-gradient-to-b from-white to-mint-50 p-6 md:p-8 rounded-3xl border border-mint-200 shadow-inner relative">
-                <div class="flex justify-between items-center mb-4 pb-2 border-b-2 border-mint-300">
-                    <div class="text-sm md:text-base font-bold text-mint-700 font-cute">
-                        📮 To. 25살의 나에게
+            <!-- 예쁜 편지지 카드 -->
+            <div class="bg-gradient-to-b from-white to-mint-50/90 p-5 md:p-7 rounded-3xl border-2 border-mint-200 shadow-inner relative">
+                <div class="flex justify-between items-center mb-3 pb-2.5 border-b-2 border-mint-300">
+                    <div class="text-lg md:text-xl font-bold text-mint-700 font-cute">
+                        📮 To. 10년 뒤 25살의 멋진 나에게
                     </div>
-                    <div class="text-xs text-slate-400">
-                        <i class="fa-solid fa-heart text-pink-400"></i> 미래를 향한 메시지
+                    <div class="text-xs font-semibold text-mint-600 bg-white px-2.5 py-1 rounded-full border border-mint-200">
+                        💌 타임캡슐 편지
                     </div>
                 </div>
 
-                <textarea id="letter_content" oninput="saveData()" rows="8" 
-                    placeholder="안녕! 10년 뒤의 나야. 지금쯤 넌 원하는 꿈을 향해 열심히 달리고 있겠지? 중학교 3학년이었던 지금의 나는..." 
-                    class="w-full bg-transparent letter-lines text-slate-700 text-sm leading-8 focus:outline-none resize-none font-medium"></textarea>
+                <textarea id="letter_content" oninput="saveData()" rows="6" 
+                    placeholder="안녕, 25살의 나야! 중학교 3학년인 내가 미래의 너에게 편지를 써. 지금 내가 세운 꿈과 목표들을 향해 한 걸음씩 나아가고 있겠지? 힘들 때도 있겠지만 넌 언제나 잘 이겨낼 거라고 믿어!" 
+                    class="w-full bg-transparent letter-lines text-slate-800 text-sm leading-8 focus:outline-none resize-none font-medium"></textarea>
 
-                <div class="text-right mt-4 pt-2 border-t border-mint-200">
-                    <span class="text-xs font-bold text-mint-800">From. 중학교 3학년의 내가 💌</span>
+                <div class="text-right mt-3 pt-2 border-t border-mint-200">
+                    <span class="text-sm md:text-base font-bold text-mint-800 font-cute">From. 중학교 3학년의 내가 🍀</span>
                 </div>
             </div>
         </section>
-    </div>
 
-    <!-- Bottom Action Bar (Fixed Controls) -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-mint-200 py-3 px-4 z-40 no-print shadow-lg">
+    </main>
+
+    <!-- 하단 고정 툴바 (예시 채우기, 초기화, 이미지 저장) -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t-2 border-mint-200 py-3 px-4 z-40 shadow-[0_-4px_20px_rgba(20,184,166,0.1)]">
         <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center space-x-2">
-                <!-- Sample Data Button -->
-                <button onclick="fillSampleData()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs md:text-sm rounded-xl font-bold transition-all flex items-center space-x-1">
-                    <i class="fa-solid fa-magic text-mint-500"></i>
-                    <span>예시 답안 보기</span>
+                <!-- 예시 답안 채우기 버튼 -->
+                <button type="button" onclick="fillSampleData()" class="px-3.5 py-2.5 bg-mint-50 hover:bg-mint-100 text-mint-800 border border-mint-300 text-xs md:text-sm rounded-xl font-bold transition-all flex items-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles text-mint-600"></i>
+                    <span>예시 답안 채우기</span>
                 </button>
 
-                <!-- Reset Button -->
-            <button onclick="resetData()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs md:text-sm rounded-xl font-bold transition-all flex items-center space-x-1">
-                <i class="fa-solid fa-rotate-left"></i>
-                <span>초기화</span>
+                <!-- 초기화 버튼 -->
+                <button type="button" onclick="openResetModal()" class="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs md:text-sm rounded-xl font-bold transition-all flex items-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>초기화</span>
+                </button>
+            </div>
+
+            <!-- 이미지로 저장하기 (A4 세로) 버튼 -->
+            <button type="button" id="downloadBtn" onclick="downloadImage()" class="px-5 py-2.5 bg-gradient-to-r from-mint-500 to-teal-500 hover:from-mint-600 hover:to-teal-600 text-white text-xs md:text-sm rounded-xl font-extrabold shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
+                <i class="fa-solid fa-image"></i>
+                <span>이미지로 저장하기 (A4 세로)</span>
             </button>
         </div>
+    </footer>
 
-        <!-- Image Download Button -->
-        <button onclick="downloadImage()" class="px-5 py-2.5 bg-gradient-to-r from-mint-500 to-teal-500 hover:from-mint-600 hover:to-teal-600 text-white text-xs md:text-sm rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
-            <i class="fa-solid fa-file-image"></i>
-            <span>이미지로 다운로드 (A4 세로 한 장)</span>
-        </button>
-    </div>
-</div>
-
-            <!-- PDF Download Button -->
-            <button onclick="downloadPDF()" class="px-5 py-2.5 bg-gradient-to-r from-mint-500 to-teal-500 hover:from-mint-600 hover:to-teal-600 text-white text-xs md:text-sm rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span>PDF로 제출/다운로드 (A4)</span>
-            </button>
+    <!-- 커스텀 초기화 확인 모달 (confirm() 대체) -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 border-2 border-mint-200 shadow-2xl text-center transform transition-all">
+            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h4 class="text-lg font-extrabold text-slate-800 mb-1.5">작성 내용을 초기화할까요?</h4>
+            <p class="text-xs md:text-sm text-slate-500 mb-5">
+                지금까지 작성하고 자동 저장된 모든 다이어리 내용이 삭제되며 복구할 수 없습니다.
+            </p>
+            <div class="flex gap-2.5">
+                <button type="button" onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors">
+                    취소
+                </button>
+                <button type="button" onclick="confirmResetData()" class="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-sm transition-colors">
+                    네, 초기화할게요
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Message Box Notification Modal -->
-    <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs md:text-sm px-4 py-2.5 rounded-full shadow-2xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center space-x-2">
+    <!-- 토스트 알림 메시지 -->
+    <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-800/95 text-white text-xs md:text-sm font-medium px-4 py-2.5 rounded-full shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center space-x-2 whitespace-nowrap">
         <span id="toastMsg">알림 메시지</span>
     </div>
 
     <script>
-        // Constants & Data Sets
+        // 1단계: 8가지 가치관 데이터
         const VALUE_OPTIONS = [
             { id: 'morality', label: '도덕성', icon: '⚖️' },
             { id: 'self_dev', label: '자기 발전', icon: '🚀' },
@@ -350,45 +429,41 @@
             { id: 'family', label: '가정의 행복', icon: '🏡' }
         ];
 
+        // 2단계: 3가지 생애 설계 영역 데이터
         const DOMAINS = [
             { id: 'career', name: '직업 설계', icon: '💼' },
             { id: 'health', name: '건강 설계', icon: '🏃' },
             { id: 'finance', name: '경제적 자립', icon: '💳' }
         ];
 
+        const PERIODS = ['teen', 'adult', 'middle', 'senior'];
         let selectedValues = [];
 
-        // Initialize App
+        // 초기 실행
         window.onload = function() {
             renderValueChips();
             renderGoalsTable();
             loadSavedData();
             updateProgress();
-
-            // Set default date if empty
-            const dateInput = document.getElementById('info_date');
-            if(!dateInput.value) {
-                dateInput.value = new Date().toISOString().substring(0, 10);
-            }
         };
 
-        // Render Value Chips in Step 1
+        // 1단계 가치관 카드 렌더링
         function renderValueChips() {
             const container = document.getElementById('valueChips');
             container.innerHTML = VALUE_OPTIONS.map(val => `
                 <button type="button" onclick="toggleValue('${val.id}')" id="btn_val_${val.id}" 
-                    class="px-3.5 py-2 rounded-2xl border-2 text-xs md:text-sm font-bold transition-all flex items-center space-x-1.5 shadow-sm bg-white border-slate-200 text-slate-600 hover:border-mint-300">
-                    <span>${val.icon}</span>
+                    class="px-3 py-2.5 rounded-2xl border-2 text-xs md:text-sm font-bold transition-all flex items-center justify-center space-x-1.5 shadow-xs bg-white border-mint-100 text-slate-700 hover:border-mint-400 hover:bg-mint-50/50">
+                    <span class="text-base">${val.icon}</span>
                     <span>${val.label}</span>
                 </button>
             `).join('');
         }
 
-        // Toggle Selection of Values
+        // 가치관 선택/해제 토글
         function toggleValue(id) {
-            const index = selectedValues.indexOf(id);
-            if(index > -1) {
-                selectedValues.splice(index, 1);
+            const idx = selectedValues.indexOf(id);
+            if (idx > -1) {
+                selectedValues.splice(idx, 1);
             } else {
                 selectedValues.push(id);
             }
@@ -396,321 +471,510 @@
             saveData();
         }
 
-        // Update Value Buttons and Input Fields
+        // 선택된 가치관 버튼 스타일 및 이유 입력칸 갱신
         function updateValueUI() {
+            // 현재 입력 중인 텍스트 보존
+            const currentInputs = {};
+            VALUE_OPTIONS.forEach(val => {
+                const el = document.getElementById(`reason_${val.id}`);
+                if (el) {
+                    currentInputs[val.id] = el.value;
+                } else {
+                    currentInputs[val.id] = localStorage.getItem(`diary_reason_${val.id}`) || '';
+                }
+            });
+
             VALUE_OPTIONS.forEach(val => {
                 const btn = document.getElementById(`btn_val_${val.id}`);
-                if(selectedValues.includes(val.id)) {
-                    btn.className = "px-3.5 py-2 rounded-2xl border-2 text-xs md:text-sm font-bold transition-all flex items-center space-x-1.5 shadow-sm bg-mint-500 border-mint-500 text-white scale-105";
+                if (!btn) return;
+                if (selectedValues.includes(val.id)) {
+                    btn.className = "px-3 py-2.5 rounded-2xl border-2 text-xs md:text-sm font-extrabold transition-all flex items-center justify-center space-x-1.5 shadow-md bg-gradient-to-r from-mint-500 to-teal-500 border-mint-500 text-white scale-[1.02]";
                 } else {
-                    btn.className = "px-3.5 py-2 rounded-2xl border-2 text-xs md:text-sm font-bold transition-all flex items-center space-x-1.5 shadow-sm bg-white border-slate-200 text-slate-600 hover:border-mint-300";
+                    btn.className = "px-3 py-2.5 rounded-2xl border-2 text-xs md:text-sm font-bold transition-all flex items-center justify-center space-x-1.5 shadow-xs bg-white border-mint-100 text-slate-700 hover:border-mint-400 hover:bg-mint-50/50";
                 }
             });
 
             const reasonsContainer = document.getElementById('valueReasonsContainer');
-            if(selectedValues.length === 0) {
+            if (selectedValues.length === 0) {
                 reasonsContainer.innerHTML = `
-                    <div class="text-center py-6 text-slate-400 text-sm bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        상단의 가치관 버튼을 선택하면 이유를 입력할 수 있는 칸이 생깁니다! 🙂
+                    <div class="text-center py-6 text-slate-400 text-xs md:text-sm bg-mint-50/40 rounded-2xl border-2 border-dashed border-mint-200">
+                        위에서 내가 중요하게 생각하는 가치관을 클릭해 보세요! ✨
                     </div>`;
                 return;
             }
 
-            // Generate Input Rows for selected values
             reasonsContainer.innerHTML = selectedValues.map(valId => {
                 const valObj = VALUE_OPTIONS.find(v => v.id === valId);
-                const savedReason = localStorage.getItem(`reason_${valId}`) || '';
+                const valText = escapeHtml(currentInputs[valId] || '');
                 return `
-                    <div class="bg-mint-50/50 p-4 rounded-2xl border border-mint-200 flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
-                        <div class="w-32 font-bold text-mint-700 text-xs md:text-sm flex items-center space-x-1">
+                    <div class="bg-mint-50/70 p-3.5 rounded-2xl border border-mint-200 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 transition-all">
+                        <div class="sm:w-32 shrink-0 font-extrabold text-mint-800 text-xs md:text-sm flex items-center space-x-1.5 bg-white px-3 py-1.5 rounded-xl border border-mint-200 shadow-2xs">
                             <span>${valObj.icon}</span>
                             <span>${valObj.label}</span>
                         </div>
-                        <input type="text" id="reason_${valId}" value="${savedReason}" oninput="saveData()"
-                            placeholder="${valObj.label}을(를) 중요하게 생각하는 이유를 적어주세요." 
-                            class="flex-1 bg-white border border-mint-200 rounded-xl px-3 py-2 text-xs md:text-sm focus:ring-2 focus:ring-mint-400 focus:outline-none">
+                        <input type="text" id="reason_${valId}" value="${valText}" oninput="saveData()"
+                            placeholder="'${valObj.label}'을(를) 중요하게 생각하는 이유를 적어주세요." 
+                            class="flex-1 bg-white border border-mint-200 rounded-xl px-3.5 py-2 text-xs md:text-sm text-slate-800 focus:ring-2 focus:ring-mint-400 focus:outline-none">
                     </div>
                 `;
             }).join('');
         }
 
-        // Render Table Rows for Step 2
+        // HTML 속성 이스케이프 헬퍼
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 2단계 표 렌더링
         function renderGoalsTable() {
             const tbody = document.getElementById('goalsTableBody');
-            const periods = ['teen', 'adult', 'middle', 'senior'];
-            
             tbody.innerHTML = DOMAINS.map(domain => `
                 <tr class="hover:bg-mint-50/30 transition-colors">
-                    <td class="p-2 border border-mint-200 font-bold text-center bg-mint-50 text-mint-800 text-xs">
-                        <div>${domain.icon}</div>
+                    <td class="p-2.5 border-r border-mint-200 font-extrabold text-center bg-mint-50/80 text-mint-800 text-xs">
+                        <div class="text-lg mb-0.5">${domain.icon}</div>
                         <div>${domain.name}</div>
                     </td>
-                    <td class="p-2 border border-mint-200">
-                        <textarea id="goal_main_${domain.id}" oninput="saveData()" rows="3" placeholder="생애 총 목표" class="w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:outline-none focus:border-mint-400 resize-none"></textarea>
+                    <td class="p-2 border-r border-mint-200 align-top">
+                        <textarea id="goal_main_${domain.id}" oninput="saveData()" rows="3" placeholder="최종 생애 목표" 
+                            class="w-full text-xs text-slate-800 p-2 bg-slate-50/60 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-mint-400 resize-none leading-relaxed"></textarea>
                     </td>
-                    <td class="p-2 border border-mint-200">
-                        <textarea id="goal_sub_${domain.id}" oninput="saveData()" rows="3" placeholder="세부 목표" class="w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:outline-none focus:border-mint-400 resize-none"></textarea>
+                    <td class="p-2 border-r border-mint-200 align-top">
+                        <textarea id="goal_sub_${domain.id}" oninput="saveData()" rows="3" placeholder="구체적 하위 목표" 
+                            class="w-full text-xs text-slate-800 p-2 bg-slate-50/60 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-mint-400 resize-none leading-relaxed"></textarea>
                     </td>
-                    ${periods.map(period => `
-                        <td class="p-2 border border-mint-200">
-                            <textarea id="action_${domain.id}_${period}" oninput="saveData()" rows="3" placeholder="실행 방안" class="w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:outline-none focus:border-mint-400 resize-none"></textarea>
+                    ${PERIODS.map((period, idx) => `
+                        <td class="p-2 ${idx < PERIODS.length - 1 ? 'border-r border-mint-200' : ''} align-top">
+                            <textarea id="action_${domain.id}_${period}" oninput="saveData()" rows="3" placeholder="시기별 실행 방안" 
+                                class="w-full text-xs text-slate-800 p-2 bg-slate-50/60 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-mint-400 resize-none leading-relaxed"></textarea>
                         </td>
                     `).join('')}
                 </tr>
             `).join('');
         }
 
-        // LocalStorage Save System
+        // LocalStorage 자동 저장
         function saveData() {
-            // Header Info
-            localStorage.setItem('info_class', document.getElementById('info_class').value);
-            localStorage.setItem('info_name', document.getElementById('info_name').value);
-            localStorage.setItem('info_date', document.getElementById('info_date').value);
+            try {
+                // 학생 정보
+                localStorage.setItem('diary_info_grade', document.getElementById('info_grade').value);
+                localStorage.setItem('diary_info_class', document.getElementById('info_class').value);
+                localStorage.setItem('diary_info_number', document.getElementById('info_number').value);
+                localStorage.setItem('diary_info_name', document.getElementById('info_name').value);
 
-            // Step 1 Values
-            localStorage.setItem('selectedValues', JSON.stringify(selectedValues));
-            selectedValues.forEach(valId => {
-                const el = document.getElementById(`reason_${valId}`);
-                if(el) localStorage.setItem(`reason_${valId}`, el.value);
-            });
-
-            // Step 2 Table Data
-            DOMAINS.forEach(domain => {
-                const mainEl = document.getElementById(`goal_main_${domain.id}`);
-                const subEl = document.getElementById(`goal_sub_${domain.id}`);
-                if(mainEl) localStorage.setItem(`goal_main_${domain.id}`, mainEl.value);
-                if(subEl) localStorage.setItem(`goal_sub_${domain.id}`, subEl.value);
-
-                ['teen', 'adult', 'middle', 'senior'].forEach(period => {
-                    const actEl = document.getElementById(`action_${domain.id}_${period}`);
-                    if(actEl) localStorage.setItem(`action_${domain.id}_${period}`, actEl.value);
+                // 1단계 가치관
+                localStorage.setItem('diary_selectedValues', JSON.stringify(selectedValues));
+                VALUE_OPTIONS.forEach(val => {
+                    const el = document.getElementById(`reason_${val.id}`);
+                    if (el) {
+                        localStorage.setItem(`diary_reason_${val.id}`, el.value);
+                    }
                 });
-            });
 
-            // Step 3 Vision & Bucket List
-            localStorage.setItem('vision_slogan', document.getElementById('vision_slogan').value);
-            for(let i=1; i<=3; i++) {
-                localStorage.setItem(`bucket_age_${i}`, document.getElementById(`bucket_age_${i}`).value);
-                localStorage.setItem(`bucket_title_${i}`, document.getElementById(`bucket_title_${i}`).value);
-                localStorage.setItem(`bucket_desc_${i}`, document.getElementById(`bucket_desc_${i}`).value);
+                // 2단계 표 데이터
+                DOMAINS.forEach(domain => {
+                    const mainEl = document.getElementById(`goal_main_${domain.id}`);
+                    const subEl = document.getElementById(`goal_sub_${domain.id}`);
+                    if (mainEl) localStorage.setItem(`diary_goal_main_${domain.id}`, mainEl.value);
+                    if (subEl) localStorage.setItem(`diary_goal_sub_${domain.id}`, subEl.value);
+
+                    PERIODS.forEach(period => {
+                        const actEl = document.getElementById(`action_${domain.id}_${period}`);
+                        if (actEl) localStorage.setItem(`diary_action_${domain.id}_${period}`, actEl.value);
+                    });
+                });
+
+                // 3단계 비전 및 버킷리스트
+                localStorage.setItem('diary_vision_slogan', document.getElementById('vision_slogan').value);
+                for (let i = 1; i <= 3; i++) {
+                    localStorage.setItem(`diary_bucket_age_${i}`, document.getElementById(`bucket_age_${i}`).value);
+                    localStorage.setItem(`diary_bucket_title_${i}`, document.getElementById(`bucket_title_${i}`).value);
+                    localStorage.setItem(`diary_bucket_desc_${i}`, document.getElementById(`bucket_desc_${i}`).value);
+                }
+
+                // 4단계 편지
+                localStorage.setItem('diary_letter_content', document.getElementById('letter_content').value);
+            } catch (e) {
+                console.warn('LocalStorage 저장 오류:', e);
             }
-
-            // Step 4 Letter
-            localStorage.setItem('letter_content', document.getElementById('letter_content').value);
 
             updateProgress();
         }
 
-        // Load Saved Data
+        // 저장된 데이터 불러오기
         function loadSavedData() {
-            document.getElementById('info_class').value = localStorage.getItem('info_class') || '';
-            document.getElementById('info_name').value = localStorage.getItem('info_name') || '';
-            if(localStorage.getItem('info_date')) {
-                document.getElementById('info_date').value = localStorage.getItem('info_date');
-            }
+            try {
+                document.getElementById('info_grade').value = localStorage.getItem('diary_info_grade') || '';
+                document.getElementById('info_class').value = localStorage.getItem('diary_info_class') || '';
+                document.getElementById('info_number').value = localStorage.getItem('diary_info_number') || '';
+                document.getElementById('info_name').value = localStorage.getItem('diary_info_name') || '';
 
-            const savedVals = localStorage.getItem('selectedValues');
-            if(savedVals) {
-                try {
+                const savedVals = localStorage.getItem('diary_selectedValues');
+                if (savedVals) {
                     selectedValues = JSON.parse(savedVals);
                     updateValueUI();
-                } catch(e) { selectedValues = []; }
-            }
+                }
 
-            // Step 2
-            DOMAINS.forEach(domain => {
-                const mainVal = localStorage.getItem(`goal_main_${domain.id}`);
-                const subVal = localStorage.getItem(`goal_sub_${domain.id}`);
-                if(mainVal) document.getElementById(`goal_main_${domain.id}`).value = mainVal;
-                if(subVal) document.getElementById(`goal_sub_${domain.id}`).value = subVal;
+                DOMAINS.forEach(domain => {
+                    const mainVal = localStorage.getItem(`diary_goal_main_${domain.id}`);
+                    const subVal = localStorage.getItem(`diary_goal_sub_${domain.id}`);
+                    if (mainVal) document.getElementById(`goal_main_${domain.id}`).value = mainVal;
+                    if (subVal) document.getElementById(`goal_sub_${domain.id}`).value = subVal;
 
-                ['teen', 'adult', 'middle', 'senior'].forEach(period => {
-                    const actVal = localStorage.getItem(`action_${domain.id}_${period}`);
-                    if(actVal) document.getElementById(`action_${domain.id}_${period}`).value = actVal;
+                    PERIODS.forEach(period => {
+                        const actVal = localStorage.getItem(`diary_action_${domain.id}_${period}`);
+                        if (actVal) document.getElementById(`action_${domain.id}_${period}`).value = actVal;
+                    });
                 });
-            });
 
-            // Step 3
-            document.getElementById('vision_slogan').value = localStorage.getItem('vision_slogan') || '';
-            for(let i=1; i<=3; i++) {
-                document.getElementById(`bucket_age_${i}`).value = localStorage.getItem(`bucket_age_${i}`) || '';
-                document.getElementById(`bucket_title_${i}`).value = localStorage.getItem(`bucket_title_${i}`) || '';
-                document.getElementById(`bucket_desc_${i}`).value = localStorage.getItem(`bucket_desc_${i}`) || '';
+                document.getElementById('vision_slogan').value = localStorage.getItem('diary_vision_slogan') || '';
+                for (let i = 1; i <= 3; i++) {
+                    document.getElementById(`bucket_age_${i}`).value = localStorage.getItem(`diary_bucket_age_${i}`) || '';
+                    document.getElementById(`bucket_title_${i}`).value = localStorage.getItem(`diary_bucket_title_${i}`) || '';
+                    document.getElementById(`bucket_desc_${i}`).value = localStorage.getItem(`diary_bucket_desc_${i}`) || '';
+                }
+
+                document.getElementById('letter_content').value = localStorage.getItem('diary_letter_content') || '';
+            } catch (e) {
+                console.warn('LocalStorage 불러오기 오류:', e);
             }
-
-            // Step 4
-            document.getElementById('letter_content').value = localStorage.getItem('letter_content') || '';
         }
 
-        // Calculate and Update Progress Bar
+        // 단계별 진행률 및 완료 뱃지 업데이트
         function updateProgress() {
-            let totalFields = 0;
-            let filledFields = 0;
-
-            // Step 1 Check
-            totalFields += 1;
-            if(selectedValues.length > 0) filledFields += 1;
-
-            // Step 2 Check (3 domains x 6 fields = 18 fields)
-            DOMAINS.forEach(domain => {
-                ['goal_main_', 'goal_sub_'].forEach(prefix => {
-                    totalFields += 1;
-                    const el = document.getElementById(`${prefix}${domain.id}`);
-                    if(el && el.value.trim() !== '') filledFields += 1;
+            // 1단계 체크: 가치관 1개 이상 선택 + 선택된 가치관 중 1개 이상 이유 작성
+            let step1Done = false;
+            if (selectedValues.length > 0) {
+                const hasReason = selectedValues.some(id => {
+                    const el = document.getElementById(`reason_${id}`);
+                    return el && el.value.trim().length > 0;
                 });
-                ['teen', 'adult', 'middle', 'senior'].forEach(period => {
-                    totalFields += 1;
-                    const el = document.getElementById(`action_${domain.id}_${period}`);
-                    if(el && el.value.trim() !== '') filledFields += 1;
+                if (hasReason) step1Done = true;
+            }
+            const s1Badge = document.getElementById('step1_status');
+            if (step1Done) {
+                s1Badge.textContent = `완료 (${selectedValues.length}개 선택)`;
+                s1Badge.className = 'shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-full bg-mint-100 text-mint-700';
+            } else {
+                s1Badge.textContent = selectedValues.length > 0 ? '이유 작성 중' : '미완료';
+                s1Badge.className = 'shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500';
+            }
+
+            // 2단계 체크: 총 18칸
+            let step2Filled = 0;
+            DOMAINS.forEach(domain => {
+                if (document.getElementById(`goal_main_${domain.id}`).value.trim()) step2Filled++;
+                if (document.getElementById(`goal_sub_${domain.id}`).value.trim()) step2Filled++;
+                PERIODS.forEach(period => {
+                    if (document.getElementById(`action_${domain.id}_${period}`).value.trim()) step2Filled++;
                 });
             });
+            const step2Done = step2Filled >= 18;
+            const s2Badge = document.getElementById('step2_status');
+            s2Badge.textContent = step2Done ? '완료 (18/18)' : `${step2Filled} / 18칸`;
+            s2Badge.className = step2Done
+                ? 'shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-full bg-mint-100 text-mint-700'
+                : 'shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500';
 
-            // Step 3 Check (Vision + 3 Buckets = 4)
-            totalFields += 4;
-            if(document.getElementById('vision_slogan').value.trim() !== '') filledFields += 1;
-            for(let i=1; i<=3; i++) {
-                if(document.getElementById(`bucket_title_${i}`).value.trim() !== '') filledFields += 1;
+            // 3단계 체크: 좌우명 + 버킷리스트 제목 3개 = 4칸
+            let step3Filled = 0;
+            if (document.getElementById('vision_slogan').value.trim()) step3Filled++;
+            for (let i = 1; i <= 3; i++) {
+                if (document.getElementById(`bucket_title_${i}`).value.trim()) step3Filled++;
             }
+            const step3Done = step3Filled >= 4;
+            const s3Badge = document.getElementById('step3_status');
+            s3Badge.textContent = step3Done ? '완료 (4/4)' : `${step3Filled} / 4칸`;
+            s3Badge.className = step3Done
+                ? 'shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-full bg-mint-100 text-mint-700'
+                : 'shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500';
 
-            // Step 4 Check (Letter = 1)
-            totalFields += 1;
-            if(document.getElementById('letter_content').value.trim() !== '') filledFields += 1;
+            // 4단계 체크: 편지 작성 여부
+            const step4Done = document.getElementById('letter_content').value.trim().length > 0;
+            const s4Badge = document.getElementById('step4_status');
+            s4Badge.textContent = step4Done ? '작성 완료' : '미완료';
+            s4Badge.className = step4Done
+                ? 'shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-full bg-mint-100 text-mint-700'
+                : 'shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500';
 
-            const percentage = Math.round((filledFields / totalFields) * 100);
+            // 상단 네비게이션 완료 뱃지 갱신
+            const stepStates = [step1Done, step2Done, step3Done, step4Done];
+            const stepIcons = ['1️⃣', '2️⃣', '3️⃣', '4️⃣'];
+            stepStates.forEach((isDone, idx) => {
+                const navBtn = document.getElementById(`nav_step_${idx + 1}`);
+                const iconSpan = navBtn.querySelector('.badge-icon');
+                if (isDone) {
+                    iconSpan.textContent = '✅';
+                    navBtn.className = 'step-nav-btn py-1.5 px-2 rounded-xl font-extrabold transition-all bg-mint-100 text-mint-800 border border-mint-300 hover:bg-mint-200 flex items-center justify-center gap-1';
+                } else {
+                    iconSpan.textContent = stepIcons[idx];
+                    navBtn.className = 'step-nav-btn py-1.5 px-2 rounded-xl font-bold transition-all bg-slate-50 text-slate-600 border border-slate-200 hover:bg-mint-50 flex items-center justify-center gap-1';
+                }
+            });
+
+            // 전체 퍼센티지 계산 (가중치: 1단계 1점 + 2단계 18점 + 3단계 4점 + 4단계 1점 = 24점 만점)
+            const totalScore = (step1Done ? 1 : 0) + step2Filled + step3Filled + (step4Done ? 1 : 0);
+            const percentage = Math.min(100, Math.round((totalScore / 24) * 100));
+
             document.getElementById('progressBar').style.width = `${percentage}%`;
-            document.getElementById('progressText').innerText = `진행률: ${percentage}%`;
+            document.getElementById('progressText').textContent = `진행률: ${percentage}%`;
         }
 
-        // Smooth Scroll to Steps
-        function scrollToStep(stepNumber) {
-            const stepEl = document.getElementById(`step${stepNumber}`);
-            if(stepEl) {
-                stepEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // 부드러운 스크롤 이동
+        function scrollToStep(stepNum) {
+            const el = document.getElementById(`step${stepNum}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
-        // Sample Data Autofill
+        // 예시 답안 자동 채우기 (중3 눈높이 모범 답안)
         function fillSampleData() {
-            document.getElementById('info_class').value = '3학년 1반 24번';
-            document.getElementById('info_name').value = '김진로';
-            
+            document.getElementById('info_grade').value = '3학년';
+            document.getElementById('info_class').value = '2반';
+            document.getElementById('info_number').value = '15번';
+            document.getElementById('info_name').value = '김민트';
+
             selectedValues = ['self_dev', 'health', 'satisfaction'];
             updateValueUI();
 
-            setTimeout(() => {
-                if(document.getElementById('reason_self_dev')) 
-                    document.getElementById('reason_self_dev').value = '매일 조금씩 발전하여 내가 원하는 꿈을 이루는 성취감을 느끼고 싶기 때문이다.';
-                if(document.getElementById('reason_health')) 
-                    document.getElementById('reason_health').value = '신체적, 정신적으로 건강해야 내가 하고 싶은 활동들을 적극적으로 즐길 수 있기 때문이다.';
-                if(document.getElementById('reason_satisfaction')) 
-                    document.getElementById('reason_satisfaction').value = '남의 시선에 얽매이지 않고 나 스스로의 삶에 당당하고 행복하고 싶기 때문이다.';
+            document.getElementById('reason_self_dev').value = '매일 조금씩 성장하며 내가 원하는 꿈을 이루는 성취감을 느끼고 싶기 때문입니다.';
+            document.getElementById('reason_health').value = '몸과 마음이 건강해야 내가 좋아하는 일과 도전을 끝까지 해낼 수 있기 때문입니다.';
+            document.getElementById('reason_satisfaction').value = '남들과 비교하기보다 나 스스로 당당하고 행복한 삶을 살아가고 싶기 때문입니다.';
 
-                // Step 2 Sample Data
-                document.getElementById('goal_main_career').value = '임상심리학자 및 진로 상담 전문가';
-                document.getElementById('goal_sub_career').value = '청소년 심리 상담 센터 운영하기';
-                document.getElementById('action_career_teen').value = '심리학 관련 도서 읽기, 심리학과 진학 공부';
-                document.getElementById('action_career_adult').value = '심리학과 학사/석사 졸업, 상담 자격증 취득';
-                document.getElementById('action_career_middle').value = '전문 상담 센터 개원 및 연구 논문 작성';
-                document.getElementById('action_career_senior').value = '무료 청소년 상담 봉사 및 강연 활동';
+            // 2단계: 직업 설계
+            document.getElementById('goal_main_career').value = '사람들의 마음을 치유하는 청소년 상담심리사';
+            document.getElementById('goal_sub_career').value = '심리학 전공 및 전문 상담 자격증 취득';
+            document.getElementById('action_career_teen').value = '진로·심리 관련 책 읽기, 또래 상담 동아리 활동하기';
+            document.getElementById('action_career_adult').value = '대학교 심리학과 진학 및 청소년상담사 자격증 취득';
+            document.getElementById('action_career_middle').value = '청소년 마음건강 센터 운영 및 전문 서적 집필하기';
+            document.getElementById('action_career_senior').value = '지역 사회 무료 심리 상담 봉사 및 후배 멘토링';
 
-                document.getElementById('goal_main_health').value = '평생 활력 있는 몸과 마음 유지하기';
-                document.getElementById('goal_sub_health').value = '주 3회 운동 습관화 및 마인드콘트롤';
-                document.getElementById('action_health_teen').value = '학교 체육시간 적극 참여, 밤 11시 전 수면';
-                document.getElementById('action_health_adult').value = '수영 및 필라테스 배우기, 정기 검진';
-                document.getElementById('action_health_middle').value = '등산 및 마라톤 도전, 균형 잡힌 식단';
-                document.getElementById('action_health_senior').value = '매일 걷기 운동 및 명상 습관 유지';
+            // 2단계: 건강 설계
+            document.getElementById('goal_main_health').value = '평생 활기차고 균형 잡힌 몸과 마음 유지하기';
+            document.getElementById('goal_sub_health').value = '규칙적인 운동 습관과 스트레스 관리법 익히기';
+            document.getElementById('action_health_teen').value = '점심시간 줄넘기, 스마트폰 줄이고 7시간 이상 숙면하기';
+            document.getElementById('action_health_adult').value = '주 3회 수영·헬스 꾸준히 하기, 매년 건강검진 받기';
+            document.getElementById('action_health_middle').value = '주말 등산 및 마라톤 완주 도전, 저염식 식단 실천';
+            document.getElementById('action_health_senior').value = '매일 아침 1시간 산책과 명상으로 마음 건강 지키기';
 
-                document.getElementById('goal_main_finance').value = '경제적 자립을 통한 안정한 삶 기반 마련';
-                document.getElementById('goal_sub_finance').value = '올바른 소비 습관 및 내 집 마련';
-                document.getElementById('action_finance_teen').value = '용돈 기입장 쓰기, 저축하는 습관 들이기';
-                document.getElementById('action_finance_adult').value = '시드머니 모으기, 올바른 투자 공부';
-                document.getElementById('action_finance_middle').value = '내 집 마련 달성, 자산 포트폴리오 관리';
-                document.getElementById('action_finance_senior').value = '연금 자산 관리를 통해 여유로운 노후 준비';
+            // 2단계: 경제적 자립 설계
+            document.getElementById('goal_main_finance').value = '계획적인 자산 관리로 경제적 자립 이루기';
+            document.getElementById('goal_sub_finance').value = '올바른 소비 습관 형성 및 내 집 마련하기';
+            document.getElementById('action_finance_teen').value = '용돈 기입장 작성하기, 용돈의 30% 저축통장에 모으기';
+            document.getElementById('action_finance_adult').value = '첫 월급부터 적금·투자 분산 관리로 종잣돈 모으기';
+            document.getElementById('action_finance_middle').value = '안정적인 내 집 마련 달성 및 노후 연금 자산 설계';
+            document.getElementById('action_finance_senior').value = '준비된 연금 자산으로 여유롭고 독립적인 노후 보내기';
 
-                // Step 3
-                document.getElementById('vision_slogan').value = '따뜻한 마음으로 타인을 도우며, 끊임없이 새로움을 배우는 사람!';
-                
-                document.getElementById('bucket_age_1').value = '22세';
-                document.getElementById('bucket_title_1').value = '유럽 배낭여행 떠나기';
-                document.getElementById('bucket_desc_1').value = '다양한 문화와 사람들을 접하며 시야를 넓히고 싶다.';
+            // 3단계: 비전 및 버킷리스트
+            document.getElementById('vision_slogan').value = '따뜻한 공감을 나누며 어제보다 한 걸음 더 성장하는 사람이 되자!';
 
-                document.getElementById('bucket_age_2').value = '28세';
-                document.getElementById('bucket_title_2').value = '나만의 첫 상담 심리책 출판하기';
-                document.getElementById('bucket_desc_2').value = '청소년들의 고민을 나누는 따뜻한 책을 집필하고 싶다.';
+            document.getElementById('bucket_age_1').value = '22세';
+            document.getElementById('bucket_title_1').value = '친구들과 유럽 배낭여행 떠나기';
+            document.getElementById('bucket_desc_1').value = '아르바이트로 모은 돈으로 넓은 세상을 경험하며 시야를 넓히고 싶다.';
 
-                document.getElementById('bucket_age_3').value = '35세';
-                document.getElementById('bucket_title_3').value = '부모님께 감사 여행 선물하기';
-                document.getElementById('bucket_desc_3').value = '항상 응원해 주신 부모님께 해외여행을 선물해 드리고 싶다.';
+            document.getElementById('bucket_age_2').value = '28세';
+            document.getElementById('bucket_title_2').value = '나만의 첫 심리 에세이 출간하기';
+            document.getElementById('bucket_desc_2').value = '청소년들의 고민을 따뜻하게 위로해 주는 책을 직접 써서 출판하고 싶다.';
 
-                // Step 4
-                document.getElementById('letter_content').value = 
-`안녕 25살의 나야!
-중학교 3학년 때의 내가 너에게 이 편지를 쓰고 있어. 
-지금쯤 너는 대학을 졸업했거나 사회에 첫발을 내딛고 있겠지? 
-학업과 미래에 대한 고민이 많았던 15살의 나는, 10년 뒤의 네가 스스로를 사랑하고 밝게 살아가고 있기를 바란다.
-힘든 순간이 와도 넌 언제나 잘 해낼 수 있을 거야. 네 꿈인 임상심리학자를 잊지 말고 항상 자신감을 가져! 화이팅!`;
+            document.getElementById('bucket_age_3').value = '35세';
+            document.getElementById('bucket_title_3').value = '부모님께 감사 효도 여행 선물하기';
+            document.getElementById('bucket_desc_3').value = '항상 믿고 응원해 주신 부모님께 멋진 해외여행을 선물해 드리고 싶다.';
 
-                saveData();
-                showToast('✨ 예시 답안이 깔끔하게 채워졌습니다!');
-            }, 50);
+            // 4단계: 10년 뒤 나에게 쓰는 편지
+            document.getElementById('letter_content').value =
+`안녕, 25살의 나야! 중학교 3학년인 내가 미래의 너에게 편지를 써.
+요즘 진로와 고등학교 진학 고민이 많지만, 10년 뒤 너는 분명 네가 좋아하는 일을 찾고 당당하게 빛나고 있을 거라고 믿어.
+혹시 지금 힘든 일이 있더라도 포기하지 마. 중3 때 세웠던 가치관과 목표들을 떠올리며 한 걸음씩 나아가자. 언제나 너를 응원해!`;
+
+            saveData();
+            showToast('✨ 예시 답안이 모든 단계에 채워졌습니다!');
         }
 
-        // Reset All Data
-        function resetData() {
-            if(confirm('작성한 모든 내용이 초기화됩니다. 정말 삭제하시겠습니까?')) {
-                localStorage.clear();
-                selectedValues = [];
-                location.reload();
+        // 초기화 모달 제어
+        function openResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmResetData() {
+            try {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('diary_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+            } catch (e) {
+                console.warn(e);
             }
+
+            selectedValues = [];
+            document.getElementById('info_grade').value = '';
+            document.getElementById('info_class').value = '';
+            document.getElementById('info_number').value = '';
+            document.getElementById('info_name').value = '';
+
+            updateValueUI();
+            renderGoalsTable();
+
+            document.getElementById('vision_slogan').value = '';
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`bucket_age_${i}`).value = '';
+                document.getElementById(`bucket_title_${i}`).value = '';
+                document.getElementById(`bucket_desc_${i}`).value = '';
+            }
+            document.getElementById('letter_content').value = '';
+
+            updateProgress();
+            closeResetModal();
+            showToast('🧹 모든 작성 내용이 깨끗하게 초기화되었습니다.');
         }
 
-        // Show Toast Notification
+        // 토스트 알림 표시
         function showToast(msg) {
             const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastMsg').textContent = msg;
             toast.classList.remove('opacity-0');
             toast.classList.add('opacity-100');
             setTimeout(() => {
                 toast.classList.remove('opacity-100');
                 toast.classList.add('opacity-0');
-            }, 2500);
+            }, 2800);
         }
 
-        // Export Entire Content to Single Page A4 Portrait PNG Image
-        function downloadImage() {
-            const studentName = document.getElementById('info_name').value.trim() || '생애설계다이어리';
-            const target = document.getElementById('pdfArea');
+        /**
+         * [핵심 버그 수정]
+         * html2canvas 캡처 시 input / textarea 내부 글자의 아랫부분이 잘리거나 스크롤되어 가려지는 현상을
+         * 원천 차단하기 위해, onclone 콜백 내부에서 모든 input과 textarea를 동일한 스타일의 <div>로 치환합니다.
+         */
+        async function downloadImage() {
+            const btn = document.getElementById('downloadBtn');
+            const originalBtnHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>이미지 생성 중...</span>`;
 
-            showToast('🖼️ A4 한 장 분량의 이미지로 변환 중입니다...');
+            const studentName = document.getElementById('info_name').value.trim() || '학생';
+            const target = document.getElementById('captureArea');
 
-            // Temporarily apply fixed styling optimized for A4 single-page image export
-            target.classList.add('export-mode');
-            window.scrollTo(0, 0);
+            showToast('🖼️ A4 세로 한 장 이미지로 변환하고 있습니다...');
 
-            // Wait brief moment for layout render
-            setTimeout(() => {
-                html2canvas(target, {
-                    scale: 2, // High resolution image
+            try {
+                const canvas = await html2canvas(target, {
+                    scale: 2, // 선명한 고해상도 출력
                     useCORS: true,
-                    backgroundColor: '#E8F8F5',
-                    logging: false
-                }).then(canvas => {
-                    // Revert UI styles
-                    target.classList.remove('export-mode');
+                    backgroundColor: '#F0FDF9',
+                    logging: false,
+                    windowWidth: 920,
+                    onclone: function(clonedDoc) {
+                        const clonedTarget = clonedDoc.getElementById('captureArea');
+                        if (!clonedTarget) return;
 
-                    // Create Download Link for PNG Image
-                    const link = document.createElement('a');
-                    link.download = `생애설계다이어리_${studentName}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
+                        // 1. A4 세로 한 장 비율 레이아웃 클래스 적용
+                        clonedTarget.classList.add('a4-capture-mode');
 
-                    showToast('✅ 이미지 다운로드가 완료되었습니다!');
-                }).catch(err => {
-                    target.classList.remove('export-mode');
-                    console.error(err);
-                    showToast('❌ 이미지 생성 중 오류가 발생했습니다.');
+                        // 2. 원본 DOM의 input/textarea 값을 복제본의 대응 요소에 정확히 매핑 후 <div>로 교체
+                        const origFields = target.querySelectorAll('input[type="text"], textarea');
+                        const clonedFields = clonedTarget.querySelectorAll('input[type="text"], textarea');
+
+                        clonedFields.forEach((clonedEl, index) => {
+                            const origEl = origFields[index];
+                            const rawValue = origEl ? origEl.value : clonedEl.value;
+                            const placeholder = clonedEl.getAttribute('placeholder') || '';
+                            const isTextarea = clonedEl.tagName.toLowerCase() === 'textarea';
+
+                            // 원본 요소의 계산된 스타일 추출
+                            const computed = origEl ? window.getComputedStyle(origEl) : window.getComputedStyle(clonedEl);
+
+                            // 대체할 div 생성
+                            const div = clonedDoc.createElement('div');
+                            div.className = clonedEl.className;
+
+                            // 기존 스타일 복사 및 텍스트 잘림 방지 핵심 스타일 덮어쓰기
+                            div.style.boxSizing = 'border-box';
+                            div.style.width = '100%';
+                            div.style.minHeight = isTextarea
+                                ? Math.max(origEl ? origEl.offsetHeight : 60, 56) + 'px'
+                                : Math.max(origEl ? origEl.offsetHeight : 36, 36) + 'px';
+                            div.style.height = 'auto';
+                            div.style.overflow = 'visible';
+                            div.style.whiteSpace = 'pre-wrap';
+                            div.style.wordBreak = 'break-word';
+                            div.style.overflowWrap = 'break-word';
+                            div.style.lineHeight = isTextarea ? '1.6' : '1.5';
+                            div.style.padding = computed.padding || '8px 12px';
+                            div.style.fontSize = computed.fontSize || '13px';
+                            div.style.fontWeight = computed.fontWeight || '500';
+                            div.style.fontFamily = computed.fontFamily;
+                            div.style.textAlign = computed.textAlign || 'left';
+                            div.style.borderRadius = computed.borderRadius || '12px';
+                            div.style.border = computed.border || '1px solid #99F6E4';
+                            div.style.backgroundColor = (computed.backgroundColor && computed.backgroundColor !== 'rgba(0, 0, 0, 0)')
+                                ? computed.backgroundColor
+                                : '#FFFFFF';
+
+                            // 편지지 영역은 줄무늬 및 줄간격 유지
+                            if (clonedEl.classList.contains('letter-lines')) {
+                                div.style.backgroundColor = 'transparent';
+                                div.style.border = 'none';
+                                div.style.lineHeight = '32px';
+                                div.style.minHeight = '160px';
+                            }
+
+                            // Flex 정렬로 세로 중앙/상단 배치 완벽 확보 (글자 하단 잘림 제로)
+                            div.style.display = 'flex';
+                            div.style.alignItems = isTextarea ? 'flex-start' : 'center';
+                            if (computed.textAlign === 'right') {
+                                div.style.justifyContent = 'flex-end';
+                            } else if (computed.textAlign === 'center') {
+                                div.style.justifyContent = 'center';
+                            } else {
+                                div.style.justifyContent = 'flex-start';
+                            }
+
+                            // 텍스트 주입 (비어있으면 연한 placeholder 표시)
+                            if (rawValue && rawValue.trim().length > 0) {
+                                div.textContent = rawValue;
+                                div.style.color = computed.color || '#1E293B';
+                            } else {
+                                div.textContent = placeholder;
+                                div.style.color = '#94A3B8';
+                            }
+
+                            // 복제 DOM에서 input/textarea를 div로 교체
+                            if (clonedEl.parentNode) {
+                                clonedEl.parentNode.replaceChild(div, clonedEl);
+                            }
+                        });
+                    }
                 });
-            }, 150);
+
+                // PNG 이미지 다운로드 실행
+                const link = document.createElement('a');
+                link.download = `생애설계다이어리_${studentName}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast(`✅ '생애설계다이어리_${studentName}.png' 저장 완료!`);
+            } catch (err) {
+                console.error('이미지 생성 오류:', err);
+                showToast('❌ 이미지 저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
         }
     </script>
 </body>
